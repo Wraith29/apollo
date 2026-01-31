@@ -1,9 +1,10 @@
-import { Plugin } from "obsidian";
+import { App, Plugin } from "obsidian";
 import {
 	DEFAULT_SETTINGS,
 	ApolloSettings as ApolloSettings,
 	ApolloSettingsTab,
 } from "./settings";
+import { AddArtistModal } from "commands/add-artist";
 
 export default class Apollo extends Plugin {
 	settings: ApolloSettings;
@@ -13,10 +14,8 @@ export default class Apollo extends Plugin {
 
 		this.addCommand({
 			id: "add-artist",
-			name: "Add Artist",
-			callback: () => {
-				console.log(this.settings);
-			},
+			name: "Add artist",
+			callback: () => addArtist(this.app, this.settings),
 		});
 
 		this.addSettingTab(new ApolloSettingsTab(this.app, this));
@@ -35,4 +34,8 @@ export default class Apollo extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
+}
+
+function addArtist(app: App, settings: ApolloSettings): void {
+	new AddArtistModal(app, settings).open();
 }

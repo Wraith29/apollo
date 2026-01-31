@@ -1,36 +1,37 @@
-import {App, PluginSettingTab, Setting} from "obsidian";
-import MyPlugin from "./main";
+import { App, PluginSettingTab, Setting } from "obsidian";
+import Apollo from "./main";
 
-export interface MyPluginSettings {
-	mySetting: string;
+export interface ApolloSettings {
+	dataFolder: string;
 }
 
-export const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
-}
+export const DEFAULT_SETTINGS: ApolloSettings = {
+	dataFolder: "Music",
+};
 
-export class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+export class ApolloSettingsTab extends PluginSettingTab {
+	plugin: Apollo;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: Apollo) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
 
 	display(): void {
-		const {containerEl} = this;
+		const { containerEl } = this;
 
 		containerEl.empty();
 
-		new Setting(containerEl)
-			.setName('Settings #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
-				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
+		new Setting(containerEl).setName("Data Folder").addDropdown((drop) => {
+			const folders = this.app.vault.getAllFolders(true);
+			folders.forEach((folder) =>
+				drop.addOption(folder.path, folder.path),
+			);
+
+			drop.onChange(async (value) => {
+				this.plugin.settings.dataFolder = value;
+				await this.plugin.saveSettings();
+			});
+		});
 	}
 }

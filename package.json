@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-sample-plugin",
+	"name": "wraith29-apollo",
 	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"description": "A music library management plugin for Obsidian (https://obsidian.md/)",
 	"main": "main.js",
 	"type": "module",
 	"scripts": {

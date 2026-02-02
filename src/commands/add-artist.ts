@@ -1,3 +1,4 @@
+import { getArtistDetails } from "musicbrainz";
 import { Modal, App, Setting, Notice } from "obsidian";
 import path from "path";
 import artistPlugin from "plugins/addArtist";
@@ -75,15 +76,20 @@ async function saveArtist(
 		return;
 	}
 
+	const artistDetails = await getArtistDetails(musicbrainzId);
 	const data = await app.vault.read(artistsFile);
 
 	const processed = await unified()
 		.use(remarkParse)
-		.use(artistPlugin, { name: artistName, musicbrainzId: musicbrainzId })
+		.use(artistPlugin, { details: artistDetails })
 		.use(remarkStringify)
 		.process(data);
 
 	await app.vault.modify(artistsFile, String(processed), {});
 
 	console.log({ message: "Data has been processed", processed: processed });
+
+	new Notice(
+		`Saved ${artistDetails.name} to ${artistsPath}. ${artistDetails["release-groups"].length} Albums saved`,
+	);
 }

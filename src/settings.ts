@@ -22,11 +22,11 @@ export class ApolloSettingsTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		new Setting(containerEl).setName("Data Folder").addDropdown((drop) => {
+		new Setting(containerEl).setName("Data folder").addDropdown((drop) => {
 			const folders = this.app.vault.getAllFolders(true);
-			folders.forEach((folder) =>
-				drop.addOption(folder.path, folder.path),
-			);
+			folders.forEach((folder) => {
+				drop.addOption(folder.path, folder.path);
+			});
 
 			drop.onChange(async (value) => {
 				this.plugin.settings.dataFolder = value;

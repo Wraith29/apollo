@@ -1,6 +1,5 @@
 import { getArtistDetails } from "musicbrainz";
 import { Modal, App, Setting, Notice } from "obsidian";
-import path from "path";
 import artistPlugin from "plugins/addArtist";
 import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
@@ -11,27 +10,18 @@ export class AddArtistModal extends Modal {
 	constructor(app: App, settings: ApolloSettings) {
 		super(app);
 
-		this.setTitle("Add Artist");
+		this.setTitle("Add artist");
 
-		let artistName: string;
 		let musicbrainzId: string;
 
 		new Setting(this.contentEl)
-			.setName("Artist Name")
-			.addText((txt) =>
-				txt
-					.setPlaceholder("Artist Name")
-					.onChange((val) => (artistName = val)),
-			);
-
-		new Setting(this.contentEl)
-			.setName("MusicBrainz Link")
+			.setName("Musicbrainz link")
 			.setDesc(
-				"Go to https://musicbrainz.org/ and search for the artist, then copy their unique ID",
+				"Go to https://musicbrainz.org/ and search for the artist, then copy their unique id",
 			)
 			.addText((txt) =>
 				txt
-					.setPlaceholder("MusicBrainz Link")
+					.setPlaceholder("Musicbrainz link")
 					.onChange((val) => (musicbrainzId = val)),
 			);
 
@@ -41,12 +31,7 @@ export class AddArtistModal extends Modal {
 				.setCta()
 				.onClick(async () => {
 					this.close();
-					await saveArtist(
-						this.app,
-						settings,
-						artistName,
-						musicbrainzId,
-					);
+					await saveArtist(this.app, settings, musicbrainzId);
 				}),
 		);
 	}
@@ -55,16 +40,9 @@ export class AddArtistModal extends Modal {
 async function saveArtist(
 	app: App,
 	settings: ApolloSettings,
-	artistName: string,
 	musicbrainzId: string,
 ): Promise<void> {
-	console.log({
-		message: "Saving Artist",
-		artistName: artistName,
-		musicbrainzId: musicbrainzId,
-	});
-
-	const artistsPath = path.join(settings.dataFolder, "Artists.md");
+	const artistsPath = [settings.dataFolder, "Artists.md"].join("/");
 	const artistsFile = app.vault.getFileByPath(artistsPath);
 	if (artistsFile === null) {
 		console.error({
@@ -86,8 +64,6 @@ async function saveArtist(
 		.process(data);
 
 	await app.vault.modify(artistsFile, String(processed), {});
-
-	console.log({ message: "Data has been processed", processed: processed });
 
 	new Notice(
 		`Saved ${artistDetails.name} to ${artistsPath}. ${artistDetails["release-groups"].length} Albums saved`,

@@ -5,6 +5,7 @@ import {
 	ApolloSettingsTab,
 } from "./settings";
 import { addArtistCommand } from "commands/add-artist";
+import { recommendAlbumCommand } from "commands/recommend-album";
 
 export default class Apollo extends Plugin {
 	settings: ApolloSettings;
@@ -16,6 +17,13 @@ export default class Apollo extends Plugin {
 			id: "add-artist",
 			name: "Add artist",
 			callback: () => addArtistCommand(this.app, this.settings),
+		});
+
+		this.addCommand({
+			id: "recommend-album",
+			name: "Recommend album",
+			callback: async () =>
+				await recommendAlbumCommand(this.app, this.settings),
 		});
 
 		this.addSettingTab(new ApolloSettingsTab(this.app, this));

@@ -24,6 +24,7 @@
 		"jiti": "2.6.1"
 	},
 	"dependencies": {
+		"mdast-util-from-markdown": "^2.0.2",
 		"obsidian": "latest",
 		"remark-parse": "^11.0.0",
 		"remark-stringify": "^11.0.0",

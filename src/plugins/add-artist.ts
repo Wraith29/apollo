@@ -61,7 +61,7 @@ function createReleaseNode(group: ReleaseGroup): ListItem {
 	};
 }
 
-export default function artistPlugin({ details }: ArtistProps) {
+export default function addArtistPlugin({ details }: ArtistProps) {
 	return async function (tree: Root) {
 		const albumNodes = details["release-groups"]
 			.filter(

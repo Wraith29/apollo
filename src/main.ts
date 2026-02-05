@@ -5,7 +5,6 @@ import {
 	ApolloSettingsTab,
 } from "./settings";
 import AddArtistModal from "components/add-artist-modal";
-import { ensureFolderExists } from "path-util";
 import { recommendAlbum } from "recommend";
 import { refreshArtistList } from "artist";
 
@@ -14,8 +13,6 @@ export default class Apollo extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-
-		await ensureFolderExists(this.app, this.settings.dataFolder);
 
 		this.addCommand({
 			id: "add-artist",

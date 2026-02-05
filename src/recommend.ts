@@ -3,11 +3,14 @@ import { App, Notice, TFile } from "obsidian";
 import { ApolloSettings } from "settings";
 import { RootContent } from "mdast";
 import { RecommendedAlbumModal } from "components/album-recommendation-modal";
+import { ensureFolderExists } from "path-util";
 
 export async function recommendAlbum(
 	app: App,
 	settings: ApolloSettings,
 ): Promise<void> {
+	await ensureFolderExists(app, settings.dataFolder);
+
 	const artistsFolderPath = [settings.dataFolder, "Artists"].join("/");
 	const artistsFolder = app.vault.getFolderByPath(artistsFolderPath);
 	if (artistsFolder === null) {

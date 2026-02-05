@@ -14,6 +14,8 @@ export async function saveArtist(
 	settings: ApolloSettings,
 	mbid: string,
 ): Promise<void> {
+	await ensureFolderExists(app, settings.dataFolder);
+
 	const artistDetails = await getArtistDetails(mbid);
 
 	await saveArtistDetails(app, settings, artistDetails);
@@ -58,7 +60,9 @@ export async function refreshArtistList(
 	app: App,
 	settings: ApolloSettings,
 ): Promise<void> {
-	const artistsFilepath = [settings.dataFolder, "Artists.md"].join("/");
+	await ensureFolderExists(app, settings.dataFolder);
+
+	const artistsFilepath = settings.artistsIndexFile;
 	await ensureFileExists(app, artistsFilepath);
 
 	const artistsFile = app.vault.getFileByPath(artistsFilepath);

@@ -16,7 +16,7 @@ export async function recommendAlbum(
 			artistsFolderPath: artistsFolderPath,
 		});
 		new Notice(
-			"Something went wrong\nPlease check the console for more detailed information.",
+			"Something went wrong.\nPlease check the console for more detailed information.",
 		);
 		return;
 	}
@@ -30,7 +30,7 @@ export async function recommendAlbum(
 			message: "Failed to get artist",
 		});
 		new Notice(
-			"Something went wrong\nPlease check the console for more detailed information.",
+			"Something went wrong.\nPlease check the console for more detailed information.",
 		);
 		return;
 	}
@@ -42,7 +42,7 @@ export async function recommendAlbum(
 			artistFile: artistFilename.path,
 		});
 		new Notice(
-			"Something went wrong\nPlease check the console for more detailed information.",
+			"Something went wrong.\nPlease check the console for more detailed information.",
 		);
 		return;
 	}
@@ -50,7 +50,6 @@ export async function recommendAlbum(
 	const artistName = artist.name.substring(0, artist.name.length - 3);
 
 	const albumNames = await parseAlbums(app, artist);
-	console.log(albumNames);
 
 	const album = albumNames[Math.floor(Math.random() * albumNames.length)];
 	if (!album) {
@@ -59,7 +58,7 @@ export async function recommendAlbum(
 			albums: albumNames,
 		});
 		new Notice(
-			"Something went wrong\nPlease check the console for more detailed information.",
+			"Something went wrong.\nPlease check the console for more detailed information.",
 		);
 		return;
 	}

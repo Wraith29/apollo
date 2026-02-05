@@ -38,7 +38,7 @@ async function saveArtistDetails(
 			detailsFilepath: detailsFilepath,
 		});
 		new Notice(
-			"Something went wrong\nPlease check the console for more detailed information.",
+			"Something went wrong.\nPlease check the console for more detailed information.",
 		);
 		return;
 	}
@@ -68,7 +68,7 @@ async function saveArtistToParentList(
 			artistsFilePath: artistsFilepath,
 		});
 		new Notice(
-			"Something went wrong\nPlease check the console for more detailed information.",
+			"Something went wrong.\nPlease check the console for more detailed information.",
 		);
 		return;
 	}

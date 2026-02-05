@@ -1,11 +1,12 @@
 import { Plugin } from "obsidian";
 import {
 	DEFAULT_SETTINGS,
-	ApolloSettings as ApolloSettings,
+	ApolloSettings,
 	ApolloSettingsTab,
 } from "./settings";
-import { addArtistCommand } from "commands/add-artist";
-import { recommendAlbumCommand } from "commands/recommend-album";
+import AddArtistModal from "components/add-artist-modal";
+import { ensureFolderExists } from "path-util";
+import { recommendAlbum } from "recommend";
 
 export default class Apollo extends Plugin {
 	settings: ApolloSettings;
@@ -13,17 +14,18 @@ export default class Apollo extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
+		await ensureFolderExists(this.app, this.settings.dataFolder);
+
 		this.addCommand({
 			id: "add-artist",
 			name: "Add artist",
-			callback: () => addArtistCommand(this.app, this.settings),
+			callback: () => new AddArtistModal(this.app, this.settings).open(),
 		});
 
 		this.addCommand({
 			id: "recommend-album",
 			name: "Recommend album",
-			callback: async () =>
-				await recommendAlbumCommand(this.app, this.settings),
+			callback: async () => await recommendAlbum(this.app, this.settings),
 		});
 
 		this.addSettingTab(new ApolloSettingsTab(this.app, this));

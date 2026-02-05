@@ -1,8 +1,8 @@
-import { saveArtist } from "data/artist";
-import { Modal, App, Setting } from "obsidian";
+import { saveArtist } from "artist";
+import { App, Modal, Setting } from "obsidian";
 import { ApolloSettings } from "settings";
 
-export class AddArtistModal extends Modal {
+export default class AddArtistModal extends Modal {
 	constructor(app: App, settings: ApolloSettings) {
 		super(app);
 
@@ -10,16 +10,15 @@ export class AddArtistModal extends Modal {
 
 		let musicbrainzId: string;
 
+		const desc = new DocumentFragment();
+		const link = desc.createEl("a");
+		link.innerText = "Musicbrainz website";
+		link.href = "https://musicbrainz.org/";
+
 		new Setting(this.contentEl)
-			.setName("Musicbrainz link")
-			.setDesc(
-				"Go to https://musicbrainz.org/ and search for the artist, then copy their unique id",
-			)
-			.addText((txt) =>
-				txt
-					.setPlaceholder("Musicbrainz link")
-					.onChange((val) => (musicbrainzId = val)),
-			);
+			.setName("Musicbrainz identifier")
+			.setDesc(desc)
+			.addText((txt) => txt.onChange((val) => (musicbrainzId = val)));
 
 		new Setting(this.contentEl).addButton((btn) =>
 			btn
@@ -27,7 +26,7 @@ export class AddArtistModal extends Modal {
 				.setCta()
 				.onClick(async () => {
 					this.close();
-					await saveArtist(this.app, settings, musicbrainzId);
+					await saveArtist(app, settings, musicbrainzId);
 				}),
 		);
 	}

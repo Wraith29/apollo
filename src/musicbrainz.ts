@@ -8,13 +8,13 @@ export type ReleaseGroup = {
 	"secondary-types": string[];
 };
 
-export type ArtistQuery = {
+export type ArtistDetails = {
 	id: string;
 	name: string;
 	"release-groups": ReleaseGroup[];
 };
 
-export async function getArtistDetails(mbid: string): Promise<ArtistQuery> {
+export async function getArtistDetails(mbid: string): Promise<ArtistDetails> {
 	const request = {
 		url: `https://musicbrainz.org/ws/2/artist/${mbid}?inc=release-groups&fmt=json`,
 		headers: {
@@ -24,9 +24,11 @@ export async function getArtistDetails(mbid: string): Promise<ArtistQuery> {
 
 	const response = await requestUrl(request);
 
-	const result = response.json as ArtistQuery;
+	const result = response.json as ArtistDetails;
 	if (!result) {
-		throw new Error("Failed to cast response to ArtistQuery object");
+		throw new Error(
+			"Failed to cast response to MusicBrainzResponse object",
+		);
 	}
 
 	return result;

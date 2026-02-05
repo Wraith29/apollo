@@ -1,8 +1,7 @@
-import { Album } from "data/albums";
 import { Modal, App } from "obsidian";
 
 export class RecommendedAlbumModal extends Modal {
-	constructor(app: App, recommended: Album) {
+	constructor(app: App, artist: string, album: string, id: string) {
 		super(app);
 
 		this.setTitle("Recommended album");
@@ -13,16 +12,17 @@ export class RecommendedAlbumModal extends Modal {
 		});
 
 		const img = container.createEl("img");
-		img.src = `http://coverartarchive.org/release-group/${recommended.id}/front-250`;
-		img.alt = `Album Cover for ${recommended.artist} - ${recommended.name}`;
+		img.src = `http://coverartarchive.org/release-group/${id}/front-250`;
+		img.alt = `Album Cover for ${artist} - ${album}`;
 
 		const albumInfo = container.createDiv();
 		albumInfo.setCssProps({
 			display: "flex",
-			flexDirection: "column",
+			"flex-direction": "column",
+			"margin-left": "5px",
 		});
 
-		albumInfo.createEl("h2").setText(recommended.artist);
-		albumInfo.createEl("p").setText(recommended.name);
+		albumInfo.createEl("h2").setText(artist);
+		albumInfo.createEl("p").setText(album);
 	}
 }

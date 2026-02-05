@@ -18,7 +18,8 @@ export async function getArtistDetails(mbid: string): Promise<ArtistDetails> {
 	const request = {
 		url: `https://musicbrainz.org/ws/2/artist/${mbid}?inc=release-groups&fmt=json`,
 		headers: {
-			"User-Agent": "ObsidianMusicManager/0.0.1 (i.acnaylor@gmail.com)",
+			"User-Agent":
+				"ObsidianMusicManager/1.0.0 (https://github.com/Wraith29/apollo/issues)",
 		},
 	};
 

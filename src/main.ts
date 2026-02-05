@@ -7,6 +7,7 @@ import {
 import AddArtistModal from "components/add-artist-modal";
 import { ensureFolderExists } from "path-util";
 import { recommendAlbum } from "recommend";
+import { refreshArtistList } from "artist";
 
 export default class Apollo extends Plugin {
 	settings: ApolloSettings;
@@ -20,6 +21,13 @@ export default class Apollo extends Plugin {
 			id: "add-artist",
 			name: "Add artist",
 			callback: () => new AddArtistModal(this.app, this.settings).open(),
+		});
+
+		this.addCommand({
+			id: "refresh-artists",
+			name: "Refresh artists",
+			callback: async () =>
+				await refreshArtistList(this.app, this.settings),
 		});
 
 		this.addCommand({

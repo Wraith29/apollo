@@ -17,7 +17,7 @@ export async function saveArtist(
 	const artistDetails = await getArtistDetails(mbid);
 
 	await saveArtistDetails(app, settings, artistDetails);
-	await saveArtistToParentList(app, settings);
+	await refreshArtistList(app, settings);
 }
 
 async function saveArtistDetails(
@@ -54,7 +54,7 @@ async function saveArtistDetails(
 	await app.vault.modify(detailsFile, String(processed));
 }
 
-async function saveArtistToParentList(
+export async function refreshArtistList(
 	app: App,
 	settings: ApolloSettings,
 ): Promise<void> {

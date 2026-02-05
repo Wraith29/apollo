@@ -12,10 +12,8 @@ jobs:
 
         steps:
             - uses: actions/checkout@v4
-            - name: Use Bun
-              uses: oven-sh/setup-bun@v2
-              with:
-                  cache: "bun"
+            - uses: oven-sh/setup-bun@v2
+
             - run: bun ci
             - run: bun run build --if-present
             - run: bun run lint

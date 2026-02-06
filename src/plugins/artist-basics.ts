@@ -20,6 +20,7 @@ export default function injectArtistBasics({ app, settings }: Props) {
 		}
 
 		const nodes = artistFolder.children
+			.filter((file) => file.name !== "Artists.md")
 			.sort((l, r) => (l.name > r.name ? 1 : -1))
 			.map(createArtistNode);
 

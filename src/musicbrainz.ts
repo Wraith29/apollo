@@ -1,4 +1,4 @@
-import { requestUrl } from "obsidian";
+import { Notice, requestUrl, RequestUrlResponse } from "obsidian";
 
 export type ReleaseGroup = {
 	title: string;
@@ -15,15 +15,25 @@ export type ArtistDetails = {
 };
 
 export async function getArtistDetails(mbid: string): Promise<ArtistDetails> {
+	const url =
+		`https://musicbrainz.org/ws/2/artist/${mbid}?inc=release-groups&fmt=json`;
+
 	const request = {
-		url: `https://musicbrainz.org/ws/2/artist/${mbid}?inc=release-groups&fmt=json`,
+		url: url,
 		headers: {
 			"User-Agent":
 				"ObsidianMusicManager/1.0.0 (https://github.com/Wraith29/apollo/issues)",
 		},
 	};
 
-	const response = await requestUrl(request);
+	let response: RequestUrlResponse;
+	try {
+		response = await requestUrl(request);
+	} catch (error) {
+		console.error({ message: "Failed to request url", url: url, error: error });
+		new Notice("Failed to get artist details.\nSee console for more information.");
+		throw error;
+	}
 
 	const result = response.json as ArtistDetails;
 	if (!result) {

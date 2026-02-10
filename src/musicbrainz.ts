@@ -8,21 +8,30 @@ export type ReleaseGroup = {
 	"secondary-types": string[];
 };
 
+export type Relation = {
+	type: string;
+	url: {
+		resource: string;
+		id: string;
+	};
+};
+
 export type ArtistDetails = {
 	id: string;
 	name: string;
 	"release-groups": ReleaseGroup[];
+	relations: Relation[];
 };
 
 export async function getArtistDetails(mbid: string): Promise<ArtistDetails> {
-	const url =
-		`https://musicbrainz.org/ws/2/artist/${mbid}?inc=release-groups&fmt=json`;
+	const includes = ["release-groups", "url-rels"].join("+");
+	const url = `https://musicbrainz.org/ws/2/artist/${mbid}?inc=${includes}&fmt=json`;
 
 	const request = {
 		url: url,
 		headers: {
-			"User-Agent":
-				"ObsidianMusicManager/1.0.0 (https://github.com/Wraith29/apollo/issues)",
+			"User-Agent": "ObsidianMusicManager/1.0.0 (https://github.com/Wraith29/apollo/issues)",
+			"Accept": "application/json",
 		},
 	};
 

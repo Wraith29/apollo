@@ -3,7 +3,7 @@ import { stringifyYaml } from "obsidian";
 import { Root, ListItem, RootContent } from "mdast";
 
 export default function injectArtistDetails(details: ArtistDetails) {
-	return function (tree: Root) {
+	return function(tree: Root) {
 		tree.children = [
 			generateArtistPropertiesNode(details),
 			...generateAlbumsNode(details),
@@ -12,12 +12,22 @@ export default function injectArtistDetails(details: ArtistDetails) {
 }
 
 function generateArtistPropertiesNode(details: ArtistDetails): RootContent {
+	const spotifyId = details.relations
+		.filter(rel => rel.type === "free streaming")
+		.find(rel => rel.url.resource.startsWith("https://open.spotify.com"));
+
+	const fileProperties: any = {
+		"added-on": new Date(),
+		"musicbrainz-id": details.id,
+	};
+
+	if (spotifyId) {
+		fileProperties["spotify-url"] = spotifyId.url.resource;
+	}
+
 	return {
 		type: "yaml",
-		value: stringifyYaml({
-			"added-on": new Date(),
-			"musicbrainz-id": details.id,
-		}),
+		value: stringifyYaml(fileProperties),
 	};
 }
 

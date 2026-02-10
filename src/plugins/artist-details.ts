@@ -1,12 +1,12 @@
 import { ArtistDetails, ReleaseGroup } from "musicbrainz";
 import { stringifyYaml } from "obsidian";
-import { Root, ListItem, RootContent } from "mdast";
+import { Root, ListItem, RootContent, Paragraph, List } from "mdast";
 
 export default function injectArtistDetails(details: ArtistDetails) {
 	return function(tree: Root) {
 		tree.children = [
 			generateArtistPropertiesNode(details),
-			...generateAlbumsNode(details),
+			...generateReleaseDetailsNodes(details),
 		];
 	};
 }
@@ -31,86 +31,108 @@ function generateArtistPropertiesNode(details: ArtistDetails): RootContent {
 	};
 }
 
-function generateAlbumsNode(details: ArtistDetails): RootContent[] {
-	const albumNodes = details["release-groups"]
-		.filter(
-			(grp) =>
-				(grp["primary-type"] === "Album" ||
-					grp["primary-type"] === "EP") &&
-				grp["secondary-types"].length === 0,
-		)
-		.sort(
-			(left, right) =>
-				new Date(left["first-release-date"]).getTime() -
-				new Date(right["first-release-date"]).getTime(),
-		)
-		.map((grp) => generateAlbumNode(grp));
+function generateReleaseDetailsNodes(details: ArtistDetails): RootContent[] {
+	const albumTypes = new Set(details["release-groups"].map(r => r["primary-type"]));
 
-	return [
-		{
-			type: "heading",
-			depth: 2,
-			children: [{ type: "text", value: "Albums" }],
-		},
-		{
-			type: "list",
-			spread: false,
-			children: albumNodes,
-		},
-	];
+	const nodes: RootContent[] = [];
+
+	albumTypes.forEach(typ => {
+		const releases = details["release-groups"].filter(rel => rel["primary-type"] === typ);
+
+		nodes.push(
+			{
+				type: "heading",
+				depth: 2,
+				children: [{
+					type: "text",
+					value: `${typ}s`
+				}]
+			},
+			{
+				type: "list",
+				spread: false,
+				children: releases.map(generateAlbumNode),
+			}
+		);
+	});
+
+	return nodes;
 }
 
 function generateAlbumNode(album: ReleaseGroup): ListItem {
 	const released = new Date(album["first-release-date"]);
 
+	const header: Paragraph = {
+		type: "paragraph",
+		children: [
+			{
+				type: "link",
+				url: `https://musicbrainz.org/release-group/${album.id}`,
+				children: [{ type: "text", value: album.title }],
+			},
+		],
+	};
+
+	const details: List = {
+		type: "list",
+		spread: false,
+		children: [
+			{
+				type: "listItem",
+				children: [
+					{
+						type: "paragraph",
+						children: [
+							{
+								type: "text",
+								value: `Release Date: ${released.toLocaleDateString()}`,
+							},
+						],
+					},
+				],
+			},
+			{
+				type: "listItem",
+				children: [
+					{
+						type: "paragraph",
+						children: [
+							{
+								type: "text",
+								value: `Type: ${album["primary-type"]}`,
+							},
+						],
+					},
+				],
+			},
+		],
+	}
+
+	if (album["secondary-types"].length > 0) {
+		const secondaryTypes = album["secondary-types"].join(",");
+
+		details.children.push({
+			type: "listItem",
+			children: [
+				{
+					type: "paragraph",
+					children: [
+						{
+							type: "text",
+							value: `Secondary-Types: ${secondaryTypes}`
+						}
+					]
+				}
+			],
+		});
+	}
+
 	return {
 		type: "listItem",
 		spread: false,
 		children: [
-			{
-				type: "paragraph",
-				children: [
-					{
-						type: "link",
-						url: `https://musicbrainz.org/release-group/${album.id}`,
-						children: [{ type: "text", value: album.title }],
-					},
-				],
-			},
-			{
-				type: "list",
-				spread: false,
-				children: [
-					{
-						type: "listItem",
-						children: [
-							{
-								type: "paragraph",
-								children: [
-									{
-										type: "text",
-										value: `Release Date: ${released.toLocaleDateString()}`,
-									},
-								],
-							},
-						],
-					},
-					{
-						type: "listItem",
-						children: [
-							{
-								type: "paragraph",
-								children: [
-									{
-										type: "text",
-										value: `Type: ${album["primary-type"]}`,
-									},
-								],
-							},
-						],
-					},
-				],
-			},
+			header,
+			details,
 		],
 	};
 }

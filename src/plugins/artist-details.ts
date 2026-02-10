@@ -11,14 +11,21 @@ export default function injectArtistDetails(details: ArtistDetails) {
 	};
 }
 
+type Properties = {
+	"added-on": Date,
+	"musicbrainz-id": string | null,
+	"spotify-url": string | null
+};
+
 function generateArtistPropertiesNode(details: ArtistDetails): RootContent {
 	const spotifyId = details.relations
 		.filter(rel => rel.type === "free streaming")
 		.find(rel => rel.url.resource.startsWith("https://open.spotify.com"));
 
-	const fileProperties: any = {
+	const fileProperties: Properties = {
 		"added-on": new Date(),
 		"musicbrainz-id": details.id,
+		"spotify-url": null,
 	};
 
 	if (spotifyId) {

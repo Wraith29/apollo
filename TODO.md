@@ -7,8 +7,8 @@
     - [ ] Include external links as properties on the file.
       - [x] Spotify
       - [ ] Social Medias?
-    - [ ] Include all releases in the artist page.
-      - [ ] Store releases under different headers for the category (## Albums, ## Singles, etc.)
+    - [x] Include all releases in the artist page.
+      - [x] Store releases under different headers for the category (## Albums, ## Singles, etc.)
   - Recommend Album
     - [ ] When an artist is selected, if the album selection fails for any reason, go back to Artist selection.
     - [ ] Add a check for whether the command is running on Mobile or Desktop and adjust styling accordingly.

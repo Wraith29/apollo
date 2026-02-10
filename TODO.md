@@ -2,7 +2,8 @@
 
 - Commands
   - Add Artist
-    - [ ] Allow pasting of entire MB link, and just slice the artist id out (makes Mobile use easier)
+    - [x] Allow pasting of entire MB link, and just slice the artist id out (makes Mobile use easier)
+    - [x] Open the new Artist file once it's created
     - [ ] Include external links as properties on the file.
     - [ ] Include all releases in the artist page.
       - [ ] Store releases under different headers for the category (## Albums, ## Singles, etc.)

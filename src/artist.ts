@@ -4,7 +4,7 @@ import remarkFrontmatter from "remark-frontmatter";
 import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
 import { ApolloSettings } from "settings";
-import { App, Notice } from "obsidian";
+import { App, Notice, TFile } from "obsidian";
 import { ArtistDetails, getArtistDetails } from "musicbrainz";
 import { ensureFileExists, ensureFolderExists } from "path-util";
 import { unified } from "unified";
@@ -12,21 +12,27 @@ import { unified } from "unified";
 export async function saveArtist(
 	app: App,
 	settings: ApolloSettings,
-	mbid: string,
+	input: string,
 ): Promise<void> {
 	await ensureFolderExists(app, settings.dataFolder);
+	const mbid = parseMbidFromInput(input);
 
 	const artistDetails = await getArtistDetails(mbid);
 
-	await saveArtistDetails(app, settings, artistDetails);
+	const artistFile = await saveArtistDetails(app, settings, artistDetails);
 	await refreshArtistList(app, settings);
+
+	if (artistFile) {
+		const leaf = app.workspace.getLeaf();
+		await leaf.openFile(artistFile);
+	}
 }
 
 async function saveArtistDetails(
 	app: App,
 	settings: ApolloSettings,
 	details: ArtistDetails,
-): Promise<void> {
+): Promise<TFile | null> {
 	const detailsFolder = [settings.dataFolder, "Artists"].join("/");
 	await ensureFolderExists(app, detailsFolder);
 
@@ -42,7 +48,7 @@ async function saveArtistDetails(
 		new Notice(
 			"Something went wrong.\nPlease check the console for more detailed information.",
 		);
-		return;
+		return null;
 	}
 
 	const content = await app.vault.read(detailsFile);
@@ -54,6 +60,8 @@ async function saveArtistDetails(
 		.process(content);
 
 	await app.vault.modify(detailsFile, String(processed));
+
+	return detailsFile;
 }
 
 export async function refreshArtistList(
@@ -85,4 +93,12 @@ export async function refreshArtistList(
 		.process(content);
 
 	await app.vault.modify(artistsFile, String(processed));
+}
+
+function parseMbidFromInput(input: string): string {
+	if (!input.startsWith("https")) {
+		return input;
+	}
+
+	return input.substring(input.lastIndexOf("/") + 1);
 }

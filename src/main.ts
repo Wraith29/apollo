@@ -36,7 +36,7 @@ export default class Apollo extends Plugin {
 		this.addSettingTab(new ApolloSettingsTab(this.app, this));
 	}
 
-	onunload() {}
+	onunload() { }
 
 	async loadSettings() {
 		this.settings = Object.assign(

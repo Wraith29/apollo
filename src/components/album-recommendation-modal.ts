@@ -1,4 +1,4 @@
-import { Modal, App } from "obsidian";
+import { Modal, App, Platform } from "obsidian";
 
 export class RecommendedAlbumModal extends Modal {
 	constructor(app: App, artist: string, album: string, id: string) {
@@ -21,6 +21,12 @@ export class RecommendedAlbumModal extends Modal {
 			"flex-direction": "column",
 			"margin-left": "5px",
 		});
+
+		if (Platform.isMobile) {
+			albumInfo.setCssProps({
+				"flex-direction": "row",
+			});
+		}
 
 		albumInfo.createEl("h2").setText(artist);
 		albumInfo.createEl("p").setText(album);

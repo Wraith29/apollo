@@ -4,9 +4,9 @@ import {
 	ApolloSettings,
 	ApolloSettingsTab,
 } from "./settings";
-import AddArtistModal from "components/add-artist-modal";
-import { recommendAlbum } from "recommend";
-import { refreshArtistList } from "artist";
+import AddArtistCommand from "commands/add-artist";
+import RefreshArtistsCommand from "commands/refresh-artists";
+import RecommendAlbumCommand from "commands/recommend-album";
 
 export default class Apollo extends Plugin {
 	settings: ApolloSettings;
@@ -14,29 +14,12 @@ export default class Apollo extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
-		this.addCommand({
-			id: "add-artist",
-			name: "Add artist",
-			callback: () => new AddArtistModal(this.app, this.settings).open(),
-		});
-
-		this.addCommand({
-			id: "refresh-artists",
-			name: "Refresh artists",
-			callback: async () =>
-				await refreshArtistList(this.app, this.settings),
-		});
-
-		this.addCommand({
-			id: "recommend-album",
-			name: "Recommend album",
-			callback: async () => await recommendAlbum(this.app, this.settings),
-		});
+		this.addCommand(AddArtistCommand(this.app, this.settings));
+		this.addCommand(RefreshArtistsCommand(this.app, this.settings));
+		this.addCommand(RecommendAlbumCommand(this.app, this.settings));
 
 		this.addSettingTab(new ApolloSettingsTab(this.app, this));
 	}
-
-	onunload() { }
 
 	async loadSettings() {
 		this.settings = Object.assign(

@@ -1,5 +1,5 @@
 import { ArtistDetails, getArtistDetails } from "musicbrainz";
-import { App, Modal, Setting } from "obsidian";
+import { App, Modal, Setting, TFile } from "obsidian";
 import injectArtistDetails from "plugins/artist-details";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkParse from "remark-parse";
@@ -47,10 +47,12 @@ export default class AddArtistModal extends Modal {
 		const mbid = parseMbid(this.musicbrainzInput);
 		const artistDetails = await getArtistDetails(mbid);
 
-		await this.saveDetails(artistDetails);
+		const file = await this.saveDetails(artistDetails);
+		const leaf = this.app.workspace.getLeaf();
+		await leaf.openFile(file);
 	}
 
-	private async saveDetails(details: ArtistDetails): Promise<void> {
+	private async saveDetails(details: ArtistDetails): Promise<TFile> {
 		const detailsPath = createFilepath(
 			this.settings.dataFolder,
 			"Artists",
@@ -68,5 +70,7 @@ export default class AddArtistModal extends Modal {
 			.process(current);
 
 		await this.app.vault.modify(detailsFile, String(processed));
+
+		return detailsFile;
 	}
 }

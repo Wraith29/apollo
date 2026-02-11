@@ -1,3 +1,4 @@
+import { refreshArtists } from "commands/refresh-artists";
 import { ArtistDetails, getArtistDetails } from "musicbrainz";
 import { App, Modal, Setting, TFile } from "obsidian";
 import injectArtistDetails from "plugins/artist-details";
@@ -48,6 +49,8 @@ export default class AddArtistModal extends Modal {
 		const artistDetails = await getArtistDetails(mbid);
 
 		const file = await this.saveDetails(artistDetails);
+		await refreshArtists(this.app, this.settings);
+
 		const leaf = this.app.workspace.getLeaf();
 		await leaf.openFile(file);
 	}

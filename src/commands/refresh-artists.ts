@@ -17,7 +17,7 @@ export default function RefreshArtistsCommand(
 	};
 }
 
-async function refreshArtists(
+export async function refreshArtists(
 	app: App,
 	settings: ApolloSettings,
 ): Promise<void> {

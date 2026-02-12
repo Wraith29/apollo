@@ -6,6 +6,7 @@ import { frontmatterFromMarkdown } from "mdast-util-frontmatter";
 import { frontmatter } from "micromark-extension-frontmatter";
 import { saveDetails } from "artist";
 import { getArtistDetails } from "musicbrainz";
+import { Properties } from "plugins/artist-details";
 
 export default function UpdateArtistsCommand(
 	app: App,
@@ -26,17 +27,14 @@ async function startUpdates(app: App, settings: ApolloSettings): Promise<void> {
 		(file) => file.name !== "Artists.md",
 	);
 
-	let iteration = 0;
-	let interval: NodeJS.Timeout;
-
 	new Notice(
 		`Starting to update artists.\nIt will take approximately ${files.length} seconds.`,
 	);
 
-	interval = setInterval(async () => {
+	let iteration = 0;
+	function updateNextArtist(): void {
 		if (iteration >= files.length) {
-			clearTimeout(interval);
-			new Notice("Finished updating artists.");
+			new Notice("Updates completed.");
 			return;
 		}
 
@@ -49,15 +47,44 @@ async function startUpdates(app: App, settings: ApolloSettings): Promise<void> {
 		}
 
 		const file = getFileOrThrow(app.vault, abstractFile.path);
-		const mbid = await findMbid(app.vault, file);
 
-		if (mbid === null) {
-			return;
-		}
+		findMbid(app.vault, file)
+			.then((mbid) => {
+				if (!mbid) {
+					return;
+				}
 
-		const details = await getArtistDetails(mbid);
-		await saveDetails(app, settings, details);
-	}, 1000);
+				getArtistDetails(mbid)
+					.then((details) => {
+						saveDetails(app, settings, details)
+							.then((file) =>
+								console.debug({
+									message: "Saved details to file",
+									file: file,
+								}),
+							)
+							.catch((_) =>
+								console.error({
+									message: "Failed to save artist details",
+								}),
+							);
+					})
+					.catch((_) =>
+						console.error({
+							message: "Failed to get artist details",
+						}),
+					);
+			})
+			.catch((_) =>
+				console.error({
+					message: "Failed to parse mbid",
+				}),
+			);
+
+		setTimeout(updateNextArtist, 1000);
+	}
+
+	updateNextArtist();
 }
 
 async function findMbid(vault: Vault, file: TFile): Promise<string | null> {
@@ -72,7 +99,7 @@ async function findMbid(vault: Vault, file: TFile): Promise<string | null> {
 		return null;
 	}
 
-	const properties = parseYaml(propsElem.value);
+	const properties = parseYaml(propsElem.value) as Properties;
 	const mbid = properties["musicbrainz-id"];
 
 	if (mbid !== "null") {

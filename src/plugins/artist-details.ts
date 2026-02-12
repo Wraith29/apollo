@@ -11,7 +11,7 @@ export default function injectArtistDetails(details: ArtistDetails) {
 	};
 }
 
-type Properties = {
+export type Properties = {
 	"added-on": Date,
 	"musicbrainz-id": string | null,
 	"spotify-url": string | null

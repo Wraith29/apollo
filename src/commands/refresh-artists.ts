@@ -6,13 +6,13 @@ import { ApolloSettings } from "settings";
 import { unified } from "unified";
 import { getFileOrCreate } from "utils";
 
-export default function RefreshArtistsCommand(
+export default function RefreshIndexCommand(
 	app: App,
 	settings: ApolloSettings,
 ): Command {
 	return {
-		id: "refresh-artists",
-		name: "Refresh artists",
+		id: "refresh-index",
+		name: "Refresh index",
 		callback: async () => await refreshArtists(app, settings),
 	};
 }

@@ -5,7 +5,7 @@ import {
 	ApolloSettingsTab,
 } from "./settings";
 import AddArtistCommand from "commands/add-artist";
-import RefreshArtistsCommand from "commands/refresh-artists";
+import RefreshIndexCommand from "commands/refresh-artists";
 import RecommendAlbumCommand from "commands/recommend-album";
 import UpdateArtistsCommand from "commands/update-artists";
 
@@ -16,7 +16,7 @@ export default class Apollo extends Plugin {
 		await this.loadSettings();
 
 		this.addCommand(AddArtistCommand(this.app, this.settings));
-		this.addCommand(RefreshArtistsCommand(this.app, this.settings));
+		this.addCommand(RefreshIndexCommand(this.app, this.settings));
 		this.addCommand(RecommendAlbumCommand(this.app, this.settings));
 		this.addCommand(UpdateArtistsCommand(this.app, this.settings));
 

@@ -1,13 +1,9 @@
+import { saveDetails } from "artist";
 import { refreshArtists } from "commands/refresh-artists";
-import { ArtistDetails, getArtistDetails } from "musicbrainz";
-import { App, Modal, Setting, TFile } from "obsidian";
-import injectArtistDetails from "plugins/artist-details";
-import remarkFrontmatter from "remark-frontmatter";
-import remarkParse from "remark-parse";
-import remarkStringify from "remark-stringify";
+import { getArtistDetails } from "musicbrainz";
+import { App, Modal, Setting } from "obsidian";
 import { ApolloSettings } from "settings";
-import { unified } from "unified";
-import { createFilepath, getFileOrCreate, parseMbid } from "utils";
+import { parseMbid } from "utils";
 
 export default class AddArtistModal extends Modal {
 	app: App;
@@ -48,32 +44,10 @@ export default class AddArtistModal extends Modal {
 		const mbid = parseMbid(this.musicbrainzInput);
 		const artistDetails = await getArtistDetails(mbid);
 
-		const file = await this.saveDetails(artistDetails);
+		const file = await saveDetails(this.app, this.settings, artistDetails);
 		await refreshArtists(this.app, this.settings);
 
 		const leaf = this.app.workspace.getLeaf();
 		await leaf.openFile(file);
-	}
-
-	private async saveDetails(details: ArtistDetails): Promise<TFile> {
-		const detailsPath = createFilepath(
-			this.settings.dataFolder,
-			"Artists",
-			`${details.name}.md`,
-		);
-
-		const detailsFile = await getFileOrCreate(this.app.vault, detailsPath);
-		const current = await this.app.vault.read(detailsFile);
-
-		const processed = await unified()
-			.use(remarkParse)
-			.use(remarkFrontmatter, ["yaml"])
-			.use(injectArtistDetails, details)
-			.use(remarkStringify)
-			.process(current);
-
-		await this.app.vault.modify(detailsFile, String(processed));
-
-		return detailsFile;
 	}
 }

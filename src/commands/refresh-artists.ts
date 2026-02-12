@@ -33,5 +33,5 @@ export async function refreshArtists(
 		.use(remarkStringify)
 		.process(current);
 
-	await app.vault.modify(indexFile, String(processed));
+	await app.vault.process(indexFile, () => String(processed));
 }

@@ -39,7 +39,7 @@ async function getRecommendedAlbum(
 
 	do {
 		artistFile = allArtists.children[randInt(allArtists.children.length)];
-		if (!artistFile) {
+		if (!artistFile || artistFile.name === "Artists.md") {
 			continue;
 		}
 

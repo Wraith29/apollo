@@ -61,7 +61,7 @@ function generateArtistPropertiesNode(
 	)?.value;
 
 	const properties: Properties | null = existingText
-		? parseYaml(existingText)
+		? (parseYaml(existingText) as Properties)
 		: null;
 
 	const spotifyId = details.relations

@@ -4,6 +4,15 @@ import type { Root, ListItem, RootContent, Paragraph, List } from "mdast";
 
 export default function injectArtistDetails(details: ArtistDetails) {
 	return (tree: Root) => {
+		const notesNode = tree.children
+			.filter((node) => node.type === "heading")
+			.find((heading) => {
+				const textNode = heading.children.find(
+					(child) =>
+						child.type === "text" && child.data && child.data === "Notes",
+				);
+			});
+
 		tree.children = [
 			generateArtistPropertiesNode(details),
 			...generateReleaseDetailsNodes(details),
@@ -12,15 +21,15 @@ export default function injectArtistDetails(details: ArtistDetails) {
 }
 
 export type Properties = {
-	"added-on": Date,
-	"musicbrainz-id": string | null,
-	"spotify-url": string | null
+	"added-on": Date;
+	"musicbrainz-id": string | null;
+	"spotify-url": string | null;
 };
 
 function generateArtistPropertiesNode(details: ArtistDetails): RootContent {
 	const spotifyId = details.relations
-		.filter(rel => rel.type === "free streaming")
-		.find(rel => rel.url.resource.startsWith("https://open.spotify.com"));
+		.filter((rel) => rel.type === "free streaming")
+		.find((rel) => rel.url.resource.startsWith("https://open.spotify.com"));
 
 	const fileProperties: Properties = {
 		"added-on": new Date(),
@@ -39,27 +48,33 @@ function generateArtistPropertiesNode(details: ArtistDetails): RootContent {
 }
 
 function generateReleaseDetailsNodes(details: ArtistDetails): RootContent[] {
-	const albumTypes = new Set(details["release-groups"].map(r => r["primary-type"]));
+	const albumTypes = new Set(
+		details["release-groups"].map((r) => r["primary-type"]),
+	);
 
 	const nodes: RootContent[] = [];
 
-	albumTypes.forEach(typ => {
-		const releases = details["release-groups"].filter(rel => rel["primary-type"] === typ);
+	albumTypes.forEach((typ) => {
+		const releases = details["release-groups"].filter(
+			(rel) => rel["primary-type"] === typ,
+		);
 
 		nodes.push(
 			{
 				type: "heading",
 				depth: 2,
-				children: [{
-					type: "text",
-					value: `${typ}s`
-				}]
+				children: [
+					{
+						type: "text",
+						value: `${typ}s`,
+					},
+				],
 			},
 			{
 				type: "list",
 				spread: false,
 				children: releases.map(generateAlbumNode),
-			}
+			},
 		);
 	});
 
@@ -113,7 +128,7 @@ function generateAlbumNode(album: ReleaseGroup): ListItem {
 				],
 			},
 		],
-	}
+	};
 
 	if (album["secondary-types"].length > 0) {
 		const secondaryTypes = album["secondary-types"].join(",");
@@ -126,10 +141,10 @@ function generateAlbumNode(album: ReleaseGroup): ListItem {
 					children: [
 						{
 							type: "text",
-							value: `Secondary-Types: ${secondaryTypes}`
-						}
-					]
-				}
+							value: `Secondary-Types: ${secondaryTypes}`,
+						},
+					],
+				},
 			],
 		});
 	}
@@ -137,9 +152,6 @@ function generateAlbumNode(album: ReleaseGroup): ListItem {
 	return {
 		type: "listItem",
 		spread: false,
-		children: [
-			header,
-			details,
-		],
+		children: [header, details],
 	};
 }

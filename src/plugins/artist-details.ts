@@ -1,9 +1,9 @@
-import { ArtistDetails, ReleaseGroup } from "musicbrainz";
+import type { ArtistDetails, ReleaseGroup } from "musicbrainz";
 import { stringifyYaml } from "obsidian";
-import { Root, ListItem, RootContent, Paragraph, List } from "mdast";
+import type { Root, ListItem, RootContent, Paragraph, List } from "mdast";
 
 export default function injectArtistDetails(details: ArtistDetails) {
-	return function(tree: Root) {
+	return (tree: Root) => {
 		tree.children = [
 			generateArtistPropertiesNode(details),
 			...generateReleaseDetailsNodes(details),

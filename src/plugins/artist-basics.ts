@@ -1,6 +1,6 @@
-import { Root, ListItem } from "mdast";
-import { App, TAbstractFile } from "obsidian";
-import { ApolloSettings } from "settings";
+import type { Root, ListItem } from "mdast";
+import type { App, TAbstractFile } from "obsidian";
+import type { ApolloSettings } from "settings";
 
 type Props = {
 	app: App;
@@ -8,7 +8,7 @@ type Props = {
 };
 
 export default function injectArtistBasics({ app, settings }: Props) {
-	return function (tree: Root) {
+	return (tree: Root) => {
 		const artistFolderPath = [settings.dataFolder, "Artists"].join("/");
 		const artistFolder = app.vault.getFolderByPath(artistFolderPath);
 		if (artistFolder === null) {

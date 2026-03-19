@@ -1,8 +1,8 @@
-import { App, Command } from "obsidian";
+import type { App, Command } from "obsidian";
 import injectArtistBasics from "plugins/artist-basics";
 import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
-import { ApolloSettings } from "settings";
+import type { ApolloSettings } from "settings";
 import { unified } from "unified";
 import { getFileOrCreate } from "utils";
 

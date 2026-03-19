@@ -1,7 +1,7 @@
 import { Plugin } from "obsidian";
 import {
 	DEFAULT_SETTINGS,
-	ApolloSettings,
+	type ApolloSettings,
 	ApolloSettingsTab,
 } from "./settings";
 import AddArtistCommand from "commands/add-artist";

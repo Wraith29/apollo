@@ -1,12 +1,12 @@
 import { fromMarkdown } from "mdast-util-from-markdown";
-import { App, Command, Notice, parseYaml, TFile, Vault } from "obsidian";
-import { ApolloSettings } from "settings";
+import { type App, type Command, Notice, parseYaml, type TFile, type Vault } from "obsidian";
+import type { ApolloSettings } from "settings";
 import { createFilepath, getFileOrThrow, getFolderOrCreate } from "utils";
 import { frontmatterFromMarkdown } from "mdast-util-frontmatter";
 import { frontmatter } from "micromark-extension-frontmatter";
 import { saveDetails } from "artist";
 import { getArtistDetails } from "musicbrainz";
-import { Properties } from "plugins/artist-details";
+import type { Properties } from "plugins/artist-details";
 
 export default function UpdateArtistsCommand(
 	app: App,

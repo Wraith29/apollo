@@ -1,5 +1,5 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
-import Apollo from "./main";
+import { type App, PluginSettingTab, Setting } from "obsidian";
+import type Apollo from "./main";
 
 export interface ApolloSettings {
 	dataFolder: string;

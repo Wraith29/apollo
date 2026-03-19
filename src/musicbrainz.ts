@@ -1,4 +1,4 @@
-import { Notice, requestUrl, RequestUrlResponse } from "obsidian";
+import { Notice, requestUrl, type RequestUrlResponse } from "obsidian";
 
 export type ReleaseGroup = {
 	title: string;

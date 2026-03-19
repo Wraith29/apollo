@@ -1,10 +1,10 @@
-import { ArtistDetails } from "musicbrainz";
-import { App, TFile } from "obsidian";
+import type { ArtistDetails } from "musicbrainz";
+import type { App, TFile } from "obsidian";
 import injectArtistDetails from "plugins/artist-details";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
-import { ApolloSettings } from "settings";
+import type { ApolloSettings } from "settings";
 import { unified } from "unified";
 import { createFilepath, getFileOrCreate } from "utils";
 

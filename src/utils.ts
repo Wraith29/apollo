@@ -1,4 +1,4 @@
-import { Notice, TFile, TFolder, Vault } from "obsidian";
+import { Notice, type TFile, type TFolder, type Vault } from "obsidian";
 
 export function createFilepath(...elems: string[]): string {
 	return elems.join("/");

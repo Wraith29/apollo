@@ -1,6 +1,6 @@
 import AddArtistModal from "components/add-artist-modal";
-import { App, Command } from "obsidian";
-import { ApolloSettings } from "settings";
+import type { App, Command } from "obsidian";
+import type { ApolloSettings } from "settings";
 
 export default function AddArtistCommand(
 	app: App,

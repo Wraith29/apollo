@@ -6,13 +6,19 @@ import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
 import type { ApolloSettings } from "settings";
 import { unified } from "unified";
-import { createFilepath, getFileOrCreate } from "utils";
+import { createFilepath, getFileOrCreate, getFolderOrCreate } from "utils";
 
 export async function saveDetails(
 	app: App,
 	settings: ApolloSettings,
 	details: ArtistDetails,
 ): Promise<TFile> {
+	await getFolderOrCreate(app.vault, settings.dataFolder);
+	await getFolderOrCreate(
+		app.vault,
+		createFilepath(settings.dataFolder, "Artists"),
+	);
+
 	const detailsPath = createFilepath(
 		settings.dataFolder,
 		"Artists",

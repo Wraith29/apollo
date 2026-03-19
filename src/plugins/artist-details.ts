@@ -1,38 +1,76 @@
+import type { List, ListItem, Paragraph, Root, RootContent } from "mdast";
 import type { ArtistDetails, ReleaseGroup } from "musicbrainz";
-import { stringifyYaml } from "obsidian";
-import type { Root, ListItem, RootContent, Paragraph, List } from "mdast";
+import { parseYaml, stringifyYaml } from "obsidian";
 
 export default function injectArtistDetails(details: ArtistDetails) {
 	return (tree: Root) => {
-		const notesNode = tree.children
-			.filter((node) => node.type === "heading")
-			.find((heading) => {
-				const textNode = heading.children.find(
-					(child) =>
-						child.type === "text" && child.data && child.data === "Notes",
-				);
-			});
-
 		tree.children = [
-			generateArtistPropertiesNode(details),
+			generateArtistPropertiesNode(tree, details),
+			...getExistingNotes(tree),
+			{
+				type: "heading",
+				depth: 2,
+				children: [{ type: "text", value: "Music" }],
+			},
 			...generateReleaseDetailsNodes(details),
 		];
 	};
 }
 
+function getIndexOfHeader(tree: Root, header: string): number {
+	return tree.children.findIndex((node) => {
+		if (node.type !== "heading") {
+			return false;
+		}
+
+		return (
+			node.children.filter(
+				(child) => child.type === "text" && child.value === header,
+			).length === 1
+		);
+	});
+}
+
+function getExistingNotes(tree: Root): RootContent[] {
+	const notesNode = getIndexOfHeader(tree, "Notes");
+	if (!notesNode) {
+		return [];
+	}
+
+	const musicNode = getIndexOfHeader(tree, "Music");
+	if (!musicNode) {
+		return tree.children.slice(notesNode);
+	}
+
+	return tree.children.slice(notesNode, musicNode);
+}
+
 export type Properties = {
 	"added-on": Date;
+	"updated-at": Date | null;
 	"musicbrainz-id": string | null;
 	"spotify-url": string | null;
 };
 
-function generateArtistPropertiesNode(details: ArtistDetails): RootContent {
+function generateArtistPropertiesNode(
+	tree: Root,
+	details: ArtistDetails,
+): RootContent {
+	const existingText = tree.children.find(
+		(node) => node.type === "yaml",
+	)?.value;
+
+	const properties: Properties | null = existingText
+		? parseYaml(existingText)
+		: null;
+
 	const spotifyId = details.relations
 		.filter((rel) => rel.type === "free streaming")
 		.find((rel) => rel.url.resource.startsWith("https://open.spotify.com"));
 
 	const fileProperties: Properties = {
-		"added-on": new Date(),
+		"added-on": properties?.["added-on"] ?? new Date(),
+		"updated-at": new Date(),
 		"musicbrainz-id": details.id,
 		"spotify-url": null,
 	};
@@ -62,7 +100,7 @@ function generateReleaseDetailsNodes(details: ArtistDetails): RootContent[] {
 		nodes.push(
 			{
 				type: "heading",
-				depth: 2,
+				depth: 3,
 				children: [
 					{
 						type: "text",

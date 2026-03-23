@@ -2,7 +2,7 @@ import { fromMarkdown } from "mdast-util-from-markdown";
 import type { App, Command, TAbstractFile, Vault } from "obsidian";
 import type { ApolloSettings } from "settings";
 import {
-	createFilepath,
+	joinPath,
 	getFileOrThrow,
 	getFolderOrCreate,
 	parseMbid,
@@ -31,7 +31,7 @@ async function getRecommendedAlbum(
 	app: App,
 	settings: ApolloSettings,
 ): Promise<void> {
-	const artistsPath = createFilepath(settings.dataFolder, "Artists");
+	const artistsPath = joinPath(settings.dataFolder, "Artists");
 	const allArtists = await getFolderOrCreate(app.vault, artistsPath);
 
 	let artistFile: TAbstractFile | undefined;

@@ -1,12 +1,19 @@
+import { saveDetails } from "artist";
 import { fromMarkdown } from "mdast-util-from-markdown";
-import { type App, type Command, Notice, parseYaml, type TFile, type Vault } from "obsidian";
-import type { ApolloSettings } from "settings";
-import { createFilepath, getFileOrThrow, getFolderOrCreate } from "utils";
 import { frontmatterFromMarkdown } from "mdast-util-frontmatter";
 import { frontmatter } from "micromark-extension-frontmatter";
-import { saveDetails } from "artist";
 import { getArtistDetails } from "musicbrainz";
-import type { Properties } from "plugins/artist-details";
+import {
+	type App,
+	type Command,
+	Notice,
+	parseYaml,
+	type TFile,
+	type Vault,
+} from "obsidian";
+import type { ApolloSettings } from "settings";
+import type { ArtistProperties } from "types/properties";
+import { joinPath, getFileOrThrow, getFolderOrCreate } from "utils";
 
 export default function UpdateArtistsCommand(
 	app: App,
@@ -20,7 +27,7 @@ export default function UpdateArtistsCommand(
 }
 
 async function startUpdates(app: App, settings: ApolloSettings): Promise<void> {
-	const artistsPath = createFilepath(settings.dataFolder, "Artists");
+	const artistsPath = joinPath(settings.dataFolder, "Artists");
 	const allArtists = await getFolderOrCreate(app.vault, artistsPath);
 
 	const files = allArtists.children.filter(
@@ -99,7 +106,7 @@ async function findMbid(vault: Vault, file: TFile): Promise<string | null> {
 		return null;
 	}
 
-	const properties = parseYaml(propsElem.value) as Properties;
+	const properties = parseYaml(propsElem.value) as ArtistProperties;
 	const mbid = properties["musicbrainz-id"];
 
 	if (mbid !== "null") {

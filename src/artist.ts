@@ -6,7 +6,7 @@ import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
 import type { ApolloSettings } from "settings";
 import { unified } from "unified";
-import { createFilepath, getFileOrCreate, getFolderOrCreate } from "utils";
+import { joinPath, getFileOrCreate, getFolderOrCreate } from "utils";
 
 export async function saveDetails(
 	app: App,
@@ -14,12 +14,9 @@ export async function saveDetails(
 	details: ArtistDetails,
 ): Promise<TFile> {
 	await getFolderOrCreate(app.vault, settings.dataFolder);
-	await getFolderOrCreate(
-		app.vault,
-		createFilepath(settings.dataFolder, "Artists"),
-	);
+	await getFolderOrCreate(app.vault, joinPath(settings.dataFolder, "Artists"));
 
-	const detailsPath = createFilepath(
+	const detailsPath = joinPath(
 		settings.dataFolder,
 		"Artists",
 		`${details.name}.md`,

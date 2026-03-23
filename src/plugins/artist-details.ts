@@ -1,6 +1,7 @@
 import type { List, ListItem, Paragraph, Root, RootContent } from "mdast";
 import type { ArtistDetails, ReleaseGroup } from "musicbrainz";
 import { parseYaml, stringifyYaml } from "obsidian";
+import type { ArtistProperties } from "types/properties";
 
 export default function injectArtistDetails(details: ArtistDetails) {
 	return (tree: Root) => {
@@ -45,13 +46,6 @@ function getExistingNotes(tree: Root): RootContent[] {
 	return tree.children.slice(notesNode, musicNode);
 }
 
-export type Properties = {
-	"added-on": Date;
-	"updated-at": Date | null;
-	"musicbrainz-id": string | null;
-	"spotify-url": string | null;
-};
-
 function generateArtistPropertiesNode(
 	tree: Root,
 	details: ArtistDetails,
@@ -60,15 +54,15 @@ function generateArtistPropertiesNode(
 		(node) => node.type === "yaml",
 	)?.value;
 
-	const properties: Properties | null = existingText
-		? (parseYaml(existingText) as Properties)
+	const properties: ArtistProperties | null = existingText
+		? (parseYaml(existingText) as ArtistProperties)
 		: null;
 
 	const spotifyId = details.relations
 		.filter((rel) => rel.type === "free streaming")
 		.find((rel) => rel.url.resource.startsWith("https://open.spotify.com"));
 
-	const fileProperties: Properties = {
+	const fileProperties: ArtistProperties = {
 		"added-on": properties?.["added-on"] ?? new Date(),
 		"updated-at": new Date(),
 		"musicbrainz-id": details.id,

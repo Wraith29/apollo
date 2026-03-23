@@ -1,6 +1,6 @@
 import { Notice, type TFile, type TFolder, type Vault } from "obsidian";
 
-export function createFilepath(...elems: string[]): string {
+export function joinPath(...elems: string[]): string {
 	return elems.join("/");
 }
 

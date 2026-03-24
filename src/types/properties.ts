@@ -9,5 +9,5 @@ export type GigProperties = {
 	"main-act": string;
 	"support-acts": string[];
 	venue: string;
-	"setlist-added": boolean;
+	"setlist-added": boolean | null;
 };

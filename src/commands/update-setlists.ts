@@ -39,14 +39,30 @@ async function updateAllGigs(
 
 	new Notice(`Found ${gigsToUpdate.length} gigs without setlists`);
 
-	for (const gig of gigsToUpdate) {
-		const error = await addSetlistToGig(app, settings, gig);
-		if (error) {
-			new Notice(error);
+	let iteration = 0;
+	function updateNextGig(): void {
+		if (iteration >= gigsToUpdate.length) {
+			new Notice("Updates completed.");
+			return;
 		}
 
-		setTimeout(() => {}, 750);
+		const gig = gigsToUpdate[iteration];
+		iteration++;
+		if (!gig) {
+			console.error({ message: "Failed to find gig." });
+			return;
+		}
+		console.info({ message: "Updating gig", gig: gig });
+
+		addSetlistToGig(app, settings, gig).then((err) => {
+			if (err) {
+				new Notice(err);
+			}
+			setTimeout(updateNextGig, 2000);
+		});
 	}
+
+	updateNextGig();
 }
 
 async function addSetlistToGig(
@@ -64,8 +80,6 @@ async function addSetlistToGig(
 		return `Failed to find a valid setlist for ${gig.mainActName} on ${gig.gigDate}`;
 	}
 
-	// TODO: Create a unified plugin to add a setlist to the Gig File.
-	// Once it's added - update the FrontMatter of the Gig to toggle `setlist-added`
 	const gigFile = app.vault.getFileByPath(gig.path);
 	if (!gigFile) {
 		return `Failed to open file at ${gig.path}`;
@@ -99,14 +113,18 @@ async function getSetlistForGig(
 	let page = 1;
 
 	while (true) {
+		if (page !== 1) {
+			await sleep(1000);
+		}
+
 		let earliestSetlist = new Date();
 		const response = await querySetlistFm(apiKey, mbid, page);
 
 		for (const setlist of response.setlist) {
-			const eventDate = parse(setlist.eventDate, DATE_FMT, new Date());
+			const eventDate = parse(setlist.eventDate, DATE_FMT, searchDate);
 			earliestSetlist = min([eventDate, earliestSetlist]);
 
-			if (eventDate.getTime() !== searchDate.getTime()) {
+			if (!dateEqual(eventDate, searchDate)) {
 				continue;
 			}
 
@@ -119,6 +137,18 @@ async function getSetlistForGig(
 
 		page += 1;
 	}
+}
+
+async function sleep(ms: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function dateEqual(left: Date, right: Date): boolean {
+	return (
+		left.getFullYear() === right.getFullYear() &&
+		left.getMonth() === right.getMonth() &&
+		left.getDate() === right.getDate()
+	);
 }
 
 async function querySetlistFm(
@@ -172,25 +202,35 @@ async function getGigsWithoutSetlists(
 
 	for (const fileData of folder.children) {
 		const file = await getFileOrCreate(app.vault, fileData.path);
-		await app.fileManager.processFrontMatter(file, (fm: GigProperties) => {
-			if (fm["setlist-added"]) {
-				return;
-			}
 
-			const actName = fm["main-act"].substring(2, fm["main-act"].length - 2);
-			const actFileName = joinPath(
-				settings.dataFolder,
-				"Artists",
-				`${actName}.md`,
-			);
+		try {
+			await app.fileManager.processFrontMatter(file, (fm: GigProperties) => {
+				if (fm["setlist-added"] || !fm["main-act"]) {
+					return;
+				}
 
-			gigsWithoutSetlists.push({
-				path: fileData.path,
-				gigDate: fileData.name.substring(0, fileData.name.length - 3),
-				mainActPath: actFileName,
-				mainActName: actName,
+				const actName = fm["main-act"].substring(2, fm["main-act"].length - 2);
+				const actFileName = joinPath(
+					settings.dataFolder,
+					"Artists",
+					`${actName}.md`,
+				);
+
+				gigsWithoutSetlists.push({
+					path: fileData.path,
+					gigDate: fileData.name.substring(0, fileData.name.length - 3),
+					mainActPath: actFileName,
+					mainActName: actName,
+				});
 			});
-		});
+		} catch (error) {
+			console.error({
+				message: "Failed to process file",
+				file: file,
+				error: error,
+			});
+			new Notice(`Error processing ${file.name}`);
+		}
 	}
 
 	return gigsWithoutSetlists;

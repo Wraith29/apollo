@@ -1,6 +1,6 @@
 {
 	"name": "wraith29-apollo",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "A music library management plugin for Obsidian (https://obsidian.md/)",
 	"main": "main.js",
 	"type": "module",

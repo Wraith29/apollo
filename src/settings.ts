@@ -56,14 +56,14 @@ export class ApolloSettingsTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Setlist.fm api key")
-			.setDesc("Select a secret from the SecretStorage")
+			.setName("Setlist api key.")
+			.setDesc("Select a secret from the secret-storage")
 			.addComponent((el) =>
 				new SecretComponent(this.app, el)
 					.setValue(this.plugin.settings.setlistFmKeySecret)
-					.onChange((value) => {
+					.onChange(async (value) => {
 						this.plugin.settings.setlistFmKeySecret = value;
-						this.plugin.saveSettings();
+						await this.plugin.saveSettings();
 					}),
 			);
 	}

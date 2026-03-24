@@ -22,7 +22,7 @@ export default function injectSetlist({ setlists }: Props) {
 }
 
 function getUpdatedProperties(yaml: Yaml): Yaml {
-	const parsed: GigProperties = parseYaml(yaml.value);
+	const parsed: GigProperties = parseYaml(yaml.value) as GigProperties;
 
 	parsed["setlist-added"] = true;
 

@@ -44,6 +44,8 @@ async function updateAllGigs(
 		if (error) {
 			new Notice(error);
 		}
+
+		setTimeout(() => {}, 750);
 	}
 }
 

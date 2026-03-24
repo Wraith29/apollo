@@ -1,15 +1,15 @@
+import { RecommendedAlbumModal } from "components/album-recommendation-modal";
+import type { ListItem } from "mdast";
 import { fromMarkdown } from "mdast-util-from-markdown";
 import type { App, Command, TAbstractFile, Vault } from "obsidian";
 import type { ApolloSettings } from "settings";
 import {
-	joinPath,
 	getFileOrThrow,
 	getFolderOrCreate,
+	joinPath,
 	parseMbid,
 	randInt,
 } from "utils";
-import type { ListItem } from "mdast";
-import { RecommendedAlbumModal } from "components/album-recommendation-modal";
 
 export default function RecommendAlbumCommand(
 	app: App,

@@ -6,9 +6,14 @@ import {
 	type RequestUrlResponse,
 	requestUrl,
 } from "obsidian";
+import injectSetlist from "plugins/setlist";
+import remarkFrontmatter from "remark-frontmatter";
+import remarkParse from "remark-parse";
+import remarkStringify from "remark-stringify";
 import type { ApolloSettings } from "settings";
 import type { ArtistProperties, GigProperties } from "types/properties";
 import type { SetlistResponse, SetlistSet } from "types/setlist";
+import { unified } from "unified";
 import { getFileOrCreate, getFolderOrCreate, joinPath } from "utils";
 
 const SETLIST_BASE_URL = "https://api.setlist.fm/rest/1.0";
@@ -32,11 +37,7 @@ async function updateAllGigs(
 	const gigsFolder = joinPath(settings.dataFolder, "Gigs");
 	const gigsToUpdate = await getGigsWithoutSetlists(app, settings, gigsFolder);
 
-	// Add an `ignore` property to GigProperties
-	// Have progression notifications: e.g.
-	// -> X gigs to update
-	// -> Y gigs updated
-	// -> Z gigs failed to update
+	new Notice(`Found ${gigsToUpdate.length} gigs without setlists`);
 
 	for (const gig of gigsToUpdate) {
 		const error = await addSetlistToGig(app, settings, gig);
@@ -51,8 +52,6 @@ async function addSetlistToGig(
 	settings: ApolloSettings,
 	gig: Gig,
 ): Promise<string> {
-	console.log(gig);
-
 	const mbid = await getMbidForGigMainAct(app, gig);
 	if (!mbid) {
 		return `No MusicBrainz ID found for ${gig.mainActName}`;
@@ -65,6 +64,20 @@ async function addSetlistToGig(
 
 	// TODO: Create a unified plugin to add a setlist to the Gig File.
 	// Once it's added - update the FrontMatter of the Gig to toggle `setlist-added`
+	const gigFile = app.vault.getFileByPath(gig.path);
+	if (!gigFile) {
+		return `Failed to open file at ${gig.path}`;
+	}
+
+	const current = await app.vault.read(gigFile);
+	const processed = await unified()
+		.use(remarkParse)
+		.use(remarkFrontmatter, ["yaml"])
+		.use(injectSetlist, { setlists: setlist })
+		.use(remarkStringify)
+		.process(current);
+
+	await app.vault.process(gigFile, () => String(processed));
 
 	return "";
 }
@@ -86,7 +99,6 @@ async function getSetlistForGig(
 	while (true) {
 		let earliestSetlist = new Date();
 		const response = await querySetlistFm(apiKey, mbid, page);
-		console.log(response);
 
 		for (const setlist of response.setlist) {
 			const eventDate = parse(setlist.eventDate, DATE_FMT, new Date());

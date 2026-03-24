@@ -1,4 +1,4 @@
-import type { Root, ListItem } from "mdast";
+import type { ListItem, Root } from "mdast";
 import type { App, TAbstractFile } from "obsidian";
 import type { ApolloSettings } from "settings";
 
@@ -21,9 +21,7 @@ export default function injectArtistBasics({ app, settings }: Props) {
 
 		const nodes = artistFolder.children
 			.filter((file) => file.name !== "Artists.md")
-			.sort((l, r) =>
-				l.name.toLowerCase() > r.name.toLowerCase() ? 1 : -1,
-			)
+			.sort((l, r) => (l.name.toLowerCase() > r.name.toLowerCase() ? 1 : -1))
 			.map(createArtistNode);
 
 		tree.children = [

@@ -6,7 +6,7 @@ import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
 import type { ApolloSettings } from "settings";
 import { unified } from "unified";
-import { joinPath, getFileOrCreate, getFolderOrCreate } from "utils";
+import { getFileOrCreate, getFolderOrCreate, joinPath } from "utils";
 
 export async function saveDetails(
 	app: App,

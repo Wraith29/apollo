@@ -16,6 +16,7 @@ type Sets = {
 
 export type SetlistSet = {
 	song: Song[];
+	encore: number | null;
 };
 
 type Song = {

@@ -1,4 +1,4 @@
-import { Modal, type App, Platform } from "obsidian";
+import { type App, Modal, Platform } from "obsidian";
 
 export class RecommendedAlbumModal extends Modal {
 	constructor(app: App, artist: string, album: string, id: string) {

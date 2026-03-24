@@ -21,10 +21,7 @@ export async function refreshArtists(
 	app: App,
 	settings: ApolloSettings,
 ): Promise<void> {
-	const indexFile = await getFileOrCreate(
-		app.vault,
-		settings.artistsIndexFile,
-	);
+	const indexFile = await getFileOrCreate(app.vault, settings.artistsIndexFile);
 
 	const current = await app.vault.read(indexFile);
 	const processed = await unified()

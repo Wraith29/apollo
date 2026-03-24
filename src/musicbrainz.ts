@@ -1,4 +1,4 @@
-import { Notice, requestUrl, type RequestUrlResponse } from "obsidian";
+import { Notice, type RequestUrlResponse, requestUrl } from "obsidian";
 
 export type ReleaseGroup = {
 	title: string;
@@ -30,8 +30,9 @@ export async function getArtistDetails(mbid: string): Promise<ArtistDetails> {
 	const request = {
 		url: url,
 		headers: {
-			"User-Agent": "ObsidianMusicManager/1.0.0 (https://github.com/Wraith29/apollo/issues)",
-			"Accept": "application/json",
+			"User-Agent":
+				"ObsidianMusicManager/1.0.0 (https://github.com/Wraith29/apollo/issues)",
+			Accept: "application/json",
 		},
 	};
 
@@ -40,15 +41,15 @@ export async function getArtistDetails(mbid: string): Promise<ArtistDetails> {
 		response = await requestUrl(request);
 	} catch (error) {
 		console.error({ message: "Failed to request url", url: url, error: error });
-		new Notice("Failed to get artist details.\nSee console for more information.");
+		new Notice(
+			"Failed to get artist details.\nSee console for more information.",
+		);
 		throw error;
 	}
 
 	const result = response.json as ArtistDetails;
 	if (!result) {
-		throw new Error(
-			"Failed to cast response to MusicBrainzResponse object",
-		);
+		throw new Error("Failed to cast response to MusicBrainzResponse object");
 	}
 
 	return result;

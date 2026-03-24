@@ -13,7 +13,7 @@ import {
 } from "obsidian";
 import type { ApolloSettings } from "settings";
 import type { ArtistProperties } from "types/properties";
-import { joinPath, getFileOrThrow, getFolderOrCreate } from "utils";
+import { getFileOrThrow, getFolderOrCreate, joinPath } from "utils";
 
 export default function UpdateArtistsCommand(
 	app: App,

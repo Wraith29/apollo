@@ -70,12 +70,10 @@ async function parseAlbums(vault: Vault, artistPath: string): Promise<Album[]> {
 
 	const albumHeader = tree.children
 		.filter((node) => node.type === "heading")
-		.find(
-			(head) =>
-				head.depth === 2 &&
-				head.children.find(
-					(node) => node.type === "text" && node.value === "Albums",
-				),
+		.find((head) =>
+			head.children.find(
+				(node) => node.type === "text" && node.value === "Albums",
+			),
 		);
 
 	if (!albumHeader) {

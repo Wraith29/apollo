@@ -1,22 +1,28 @@
-import AddArtistCommand from "./commands/add-artist";
-import RecommendAlbumCommand from "./commands/recommend-album";
-import RefreshIndexCommand from "./commands/refresh-artists";
-import UpdateArtistsCommand from "./commands/update-artists";
-import UpdateSetlistsCommand from "./commands/update-setlists";
 import { Plugin } from "obsidian";
 import {
 	type ApolloSettings,
 	ApolloSettingsTab,
 	DEFAULT_SETTINGS,
 } from "./settings";
+import { FileSystem, IFileSystem } from "./filesystem";
+import RefreshIndexCommand from "./commands/refresh-artists";
+import RecommendAlbumCommand from "./commands/recommend-album";
+import UpdateArtistsCommand from "./commands/update-artists";
+import UpdateSetlistsCommand from "./commands/update-setlists";
+import AddArtistModal from "./components/add-artist-modal";
 
 export default class Apollo extends Plugin {
 	settings: ApolloSettings = DEFAULT_SETTINGS;
+	fileSystem: IFileSystem;
 
 	async onload() {
 		await this.loadSettings();
+		this.fileSystem = new FileSystem();
 
-		this.addCommand(AddArtistCommand(this.app, this.settings));
+		this.addCommand({
+			id: "add-artist",
+			name: "Add artist",
+		});
 		this.addCommand(RefreshIndexCommand(this.app, this.settings));
 		this.addCommand(RecommendAlbumCommand(this.app, this.settings));
 		this.addCommand(UpdateArtistsCommand(this.app, this.settings));

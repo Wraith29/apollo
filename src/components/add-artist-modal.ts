@@ -1,20 +1,24 @@
 import { type App, Modal, Setting } from "obsidian";
 import { ApolloSettings } from "../settings";
-import { parseMbid } from "../utils";
-import { getArtistDetails } from "../musicbrainz";
+import { IFileSystem } from "../filesystem";
+import { IMusicbrainzClient } from "../clients/musicbrainz";
 import { saveDetails } from "../artist";
 import refreshArtists from "../commands/refresh-artists";
 
 export default class AddArtistModal extends Modal {
 	app: App;
 	settings: ApolloSettings;
-	musicbrainzInput: string = "";
+	fileSystem: IFileSystem;
+	musicbrainzClient: IMusicbrainzClient;
+	input: string;
 
-	constructor(app: App, settings: ApolloSettings) {
+	constructor(app: App, settings: ApolloSettings, fileSystem: IFileSystem) {
 		super(app);
 
 		this.app = app;
 		this.settings = settings;
+		this.fileSystem = fileSystem;
+		this.input = "";
 
 		this.setTitle("Add artist");
 
@@ -28,23 +32,17 @@ export default class AddArtistModal extends Modal {
 			.setName("Musicbrainz identifier")
 			.setDesc(desc)
 			.addText((txt) =>
-				txt.onChange((val) => {
-					this.musicbrainzInput = val;
+				txt.onChange((val: string) => {
+					this.input = val;
 				}),
 			);
-
-		new Setting(this.contentEl).addButton((btn): void => {
-			btn.setButtonText("Submit")
-				.setCta()
-				.onClick(async () => await this.onSubmit());
-		});
 	}
 
 	private async onSubmit(): Promise<void> {
 		this.close();
 
-		const mbid = parseMbid(this.musicbrainzInput);
-		const artistDetails = await getArtistDetails(mbid);
+		const mbid = extractMbid(this.input);
+		const artistDetails = await this.musicbrainzClient.getArtistDetails(mbid);
 
 		const file = await saveDetails(this.app, this.settings, artistDetails);
 		await refreshArtists(this.app, this.settings);
@@ -52,4 +50,10 @@ export default class AddArtistModal extends Modal {
 		const leaf = this.app.workspace.getLeaf();
 		await leaf.openFile(file);
 	}
+
+}
+
+function extractMbid(url: string): string {
+	const lastSlash = url.lastIndexOf("/");
+	return url.substring(lastSlash + 1);
 }

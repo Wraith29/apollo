@@ -1,10 +1,10 @@
 import type { App, Command } from "obsidian";
-import injectArtistBasics from "plugins/artist-basics";
+import injectArtistBasics from "../plugins/artist-basics";
 import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
-import type { ApolloSettings } from "settings";
+import type { ApolloSettings } from "../settings";
 import { unified } from "unified";
-import { getFileOrCreate } from "utils";
+import { getFileOrCreate } from "../utils";
 
 export default function RefreshIndexCommand(
 	app: App,
@@ -21,7 +21,10 @@ export async function refreshArtists(
 	app: App,
 	settings: ApolloSettings,
 ): Promise<void> {
-	const indexFile = await getFileOrCreate(app.vault, settings.artistsIndexFile);
+	const indexFile = await getFileOrCreate(
+		app.vault,
+		settings.artistsIndexFile,
+	);
 
 	const current = await app.vault.read(indexFile);
 	const processed = await unified()

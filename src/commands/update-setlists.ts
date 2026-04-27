@@ -6,15 +6,15 @@ import {
 	type RequestUrlResponse,
 	requestUrl,
 } from "obsidian";
-import injectSetlist from "plugins/setlist";
+import injectSetlist from "../plugins/setlist";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
-import type { ApolloSettings } from "settings";
-import type { ArtistProperties, GigProperties } from "types/properties";
-import type { SetlistResponse, SetlistSet } from "types/setlist";
+import type { ApolloSettings } from "../settings";
+import type { ArtistProperties, GigProperties } from "../types/properties";
+import type { SetlistResponse, SetlistSet } from "../types/setlist";
 import { unified } from "unified";
-import { getFileOrCreate, getFolderOrCreate, joinPath } from "utils";
+import { getFileOrCreate, getFolderOrCreate, joinPath } from "../utils";
 
 const SETLIST_BASE_URL = "https://api.setlist.fm/rest/1.0";
 const DATE_FMT = "dd-MM-yyyy";
@@ -35,7 +35,11 @@ async function updateAllGigs(
 	settings: ApolloSettings,
 ): Promise<void> {
 	const gigsFolder = joinPath(settings.dataFolder, "Gigs");
-	const gigsToUpdate = await getGigsWithoutSetlists(app, settings, gigsFolder);
+	const gigsToUpdate = await getGigsWithoutSetlists(
+		app,
+		settings,
+		gigsFolder,
+	);
 
 	new Notice(`Found ${gigsToUpdate.length} gigs without setlists`);
 
@@ -170,7 +174,11 @@ async function querySetlistFm(
 	try {
 		response = await requestUrl(request);
 	} catch (error) {
-		console.error({ message: "Failed to request url", url: url, error: error });
+		console.error({
+			message: "Failed to request url",
+			url: url,
+			error: error,
+		});
 		new Notice(
 			"Failed to get setlist data.\nSee console for more information.",
 		);
@@ -204,25 +212,34 @@ async function getGigsWithoutSetlists(
 		const file = await getFileOrCreate(app.vault, fileData.path);
 
 		try {
-			await app.fileManager.processFrontMatter(file, (fm: GigProperties) => {
-				if (fm["setlist-added"] || !fm["main-act"]) {
-					return;
-				}
+			await app.fileManager.processFrontMatter(
+				file,
+				(fm: GigProperties) => {
+					if (fm["setlist-added"] || !fm["main-act"]) {
+						return;
+					}
 
-				const actName = fm["main-act"].substring(2, fm["main-act"].length - 2);
-				const actFileName = joinPath(
-					settings.dataFolder,
-					"Artists",
-					`${actName}.md`,
-				);
+					const actName = fm["main-act"].substring(
+						2,
+						fm["main-act"].length - 2,
+					);
+					const actFileName = joinPath(
+						settings.dataFolder,
+						"Artists",
+						`${actName}.md`,
+					);
 
-				gigsWithoutSetlists.push({
-					path: fileData.path,
-					gigDate: fileData.name.substring(0, fileData.name.length - 3),
-					mainActPath: actFileName,
-					mainActName: actName,
-				});
-			});
+					gigsWithoutSetlists.push({
+						path: fileData.path,
+						gigDate: fileData.name.substring(
+							0,
+							fileData.name.length - 3,
+						),
+						mainActPath: actFileName,
+						mainActName: actName,
+					});
+				},
+			);
 		} catch (error) {
 			console.error({
 				message: "Failed to process file",

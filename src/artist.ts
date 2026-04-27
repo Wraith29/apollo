@@ -1,12 +1,12 @@
-import type { ArtistDetails } from "musicbrainz";
+import type { ArtistDetails } from "./musicbrainz";
 import type { App, TFile } from "obsidian";
-import injectArtistDetails from "plugins/artist-details";
+import injectArtistDetails from "./plugins/artist-details";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
-import type { ApolloSettings } from "settings";
+import type { ApolloSettings } from "./settings";
 import { unified } from "unified";
-import { getFileOrCreate, getFolderOrCreate, joinPath } from "utils";
+import { getFileOrCreate, getFolderOrCreate, joinPath } from "./utils";
 
 export async function saveDetails(
 	app: App,
@@ -14,7 +14,10 @@ export async function saveDetails(
 	details: ArtistDetails,
 ): Promise<TFile> {
 	await getFolderOrCreate(app.vault, settings.dataFolder);
-	await getFolderOrCreate(app.vault, joinPath(settings.dataFolder, "Artists"));
+	await getFolderOrCreate(
+		app.vault,
+		joinPath(settings.dataFolder, "Artists"),
+	);
 
 	const detailsPath = joinPath(
 		settings.dataFolder,

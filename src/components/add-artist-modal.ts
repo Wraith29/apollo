@@ -1,14 +1,14 @@
-import { saveDetails } from "artist";
-import { refreshArtists } from "commands/refresh-artists";
-import { getArtistDetails } from "musicbrainz";
 import { type App, Modal, Setting } from "obsidian";
-import type { ApolloSettings } from "settings";
-import { parseMbid } from "utils";
+import { ApolloSettings } from "../settings";
+import { parseMbid } from "../utils";
+import { getArtistDetails } from "../musicbrainz";
+import { saveDetails } from "../artist";
+import refreshArtists from "../commands/refresh-artists";
 
 export default class AddArtistModal extends Modal {
 	app: App;
 	settings: ApolloSettings;
-	musicbrainzInput: string;
+	musicbrainzInput: string = "";
 
 	constructor(app: App, settings: ApolloSettings) {
 		super(app);
@@ -34,8 +34,7 @@ export default class AddArtistModal extends Modal {
 			);
 
 		new Setting(this.contentEl).addButton((btn): void => {
-			btn
-				.setButtonText("Submit")
+			btn.setButtonText("Submit")
 				.setCta()
 				.onClick(async () => await this.onSubmit());
 		});

@@ -1,8 +1,8 @@
-import AddArtistCommand from "commands/add-artist";
-import RecommendAlbumCommand from "commands/recommend-album";
-import RefreshIndexCommand from "commands/refresh-artists";
-import UpdateArtistsCommand from "commands/update-artists";
-import UpdateSetlistsCommand from "commands/update-setlists";
+import AddArtistCommand from "./commands/add-artist";
+import RecommendAlbumCommand from "./commands/recommend-album";
+import RefreshIndexCommand from "./commands/refresh-artists";
+import UpdateArtistsCommand from "./commands/update-artists";
+import UpdateSetlistsCommand from "./commands/update-setlists";
 import { Plugin } from "obsidian";
 import {
 	type ApolloSettings,
@@ -11,7 +11,7 @@ import {
 } from "./settings";
 
 export default class Apollo extends Plugin {
-	settings: ApolloSettings;
+	settings: ApolloSettings = DEFAULT_SETTINGS;
 
 	async onload() {
 		await this.loadSettings();

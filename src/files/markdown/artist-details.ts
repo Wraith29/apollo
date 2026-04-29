@@ -1,51 +1,121 @@
 import { unified } from "unified";
-import { ArtistDetails, ReleaseGroup } from "../../types/musicbrainz";
-import { IFileSystem } from "../filesystem";
-import { Root } from "mdast";
+import { ArtistDetails, ReleaseGroup } from "@/types/musicbrainz";
+import { IFileSystem } from "@/files/filesystem";
+import { Root, RootContent } from "mdast";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkParse from "remark-parse";
 import { YAML } from "bun";
+import { getIndexOfHeader } from "./utils";
 
-class FileProperties {
-    "added-on": Date | null = new Date();
-    "updated-on": Date | null = new Date();
-    "musicbrainz-id": string | null = null;
-    "musicbrainz-url": string | null = null;
-    "spotify-url": string | null = null;
-    "instagram-url": string | null = null;
-    "tags": string[] = [];
+export type FileProperties = {
+	"added-on": Date | string | null;
+	"updated-on": Date | string | null;
+	"musicbrainz-id": string | null;
+	"musicbrainz-url": string | null;
+	"spotify-url": string | null;
+	"instagram-url": string | null;
+};
+
+function defaultProperties(): FileProperties {
+	return {
+		"added-on": new Date(),
+		"updated-on": new Date(),
+		"musicbrainz-id": null,
+		"musicbrainz-url": null,
+		"spotify-url": null,
+		"instagram-url": null,
+	};
 }
 
 export default class ArtistDetailsFile {
-    private readonly _filePath: string;
-    private readonly _fileSystem: IFileSystem;
+	private readonly _filePath: string;
+	private readonly _fileSystem: IFileSystem;
 
-    private _properties: FileProperties = new FileProperties();
-    private _notes: string | null = null;
-    private _releases: Record<string, ReleaseGroup[]>[] = [];
+	private _properties: FileProperties = defaultProperties();
+	private _notes: string[] = [];
+	private _releases: Record<string, ReleaseGroup[]>[] = [];
 
-    constructor(filePath: string, fileSystem: IFileSystem) {
-        this._filePath = filePath;
-        this._fileSystem = fileSystem;
-    }
+	constructor(filePath: string, fileSystem: IFileSystem) {
+		this._filePath = filePath;
+		this._fileSystem = fileSystem;
+	}
 
-    public async process(artistDetails: ArtistDetails): Promise<void> {
-        const currentData = await this._fileSystem.readFile(this._filePath);
-        const processor = unified().use(remarkParse).use(remarkFrontmatter);
-        const ast = processor.parse(currentData);
+	public getProperties(): FileProperties {
+		return this._properties;
+	}
 
-        this.processProperties(ast, artistDetails);
-    }
+	public getNotes(): string[] {
+		return this._notes;
+	}
 
-    private processProperties(ast: Root, artistDetails: ArtistDetails): void { 
-        const propertyNode = ast.children.find(node => node.type === "yaml");
-        if (!propertyNode) {
-            return;
-        }
+	public getReleases(): Record<string, ReleaseGroup[]>[] {
+		return this._releases;
+	}
 
-        const propertyData = YAML.parse(propertyNode.value) as FileProperties;
-        this._properties = this._properties || propertyData;
-    }
+	public async process(artistDetails: ArtistDetails): Promise<void> {
+		const currentData = await this._fileSystem.readFile(this._filePath);
+		const processor = unified().use(remarkParse).use(remarkFrontmatter);
+		const ast = processor.parse(currentData);
 
-    private processBody(ast: Root, artistDetails: ArtistDetails): void { }
+		this.processProperties(ast, artistDetails);
+		this.processBody(ast, artistDetails);
+	}
+
+	private processProperties(ast: Root, artistDetails: ArtistDetails): void {
+		const propertyNode = ast.children.find((node) => node.type === "yaml");
+		const propertyData =
+			propertyNode && propertyNode.value
+				? (YAML.parse(propertyNode.value) as FileProperties)
+				: null;
+
+		let addedOn = new Date();
+		if (propertyNode && propertyData && propertyData["added-on"]) {
+			addedOn = new Date(propertyData["added-on"]);
+		}
+
+		const spotifyUrl =
+			artistDetails.relations
+				.filter((rel) => rel.type === "free streaming")
+				.find((rel) =>
+					rel.url.resource.startsWith("https://open.spotify.com"),
+				)?.url.resource ?? null;
+
+		const instagramUrl =
+			artistDetails.relations
+				.filter((rel) => rel.type === "social network")
+				.find((rel) =>
+					rel.url.resource.startsWith("https://www.instagram.com"),
+				)?.url.resource ?? null;
+
+		this._properties = {
+			"added-on": addedOn,
+			"updated-on": new Date(),
+			"musicbrainz-id": artistDetails.id,
+			"musicbrainz-url": `https://musicbrainz.org/artist/${artistDetails.id}`,
+			"spotify-url": spotifyUrl,
+			"instagram-url": instagramUrl,
+		};
+	}
+
+	private processBody(ast: Root, artistDetails: ArtistDetails): void {
+		const notesNode = getIndexOfHeader(ast, "Notes");
+		const musicNode = getIndexOfHeader(ast, "Music");
+
+		console.log(notesNode);
+		console.log(musicNode);
+
+		let notesSrc: RootContent[] = [];
+		if (notesNode >= 0 && musicNode < 0) {
+			notesSrc = ast.children.slice(notesNode + 1);
+		} else if (notesNode >= 0 && musicNode >= 0) {
+			notesSrc = ast.children.slice(notesNode + 1, musicNode);
+		}
+
+		const paragraphs = notesSrc.filter((node) => node.type === "paragraph");
+		this._notes = paragraphs.flatMap((para) =>
+			para.children
+				.filter((node) => node.type === "text")
+				.map((node) => node.value),
+		);
+	}
 }

@@ -163,18 +163,77 @@ describe("process", () => {
 		});
 	});
 
-	test("saves any existing notes from the current version", async () => {
-		const input = "## Notes\n\nHello World!";
-		const fsMock = buildFsMock({ readFile: input });
+	const notesCases = [
+		{
+			input: "## Notes\n\nHello, World!",
+			expected: ["Hello, World!"]
+		},
+		{
+			input: "## Notes\n\nHello, World!\n\nHi again :)",
+			expected: ["Hello, World!", "Hi again :)"]
+		},
+		{
+			input: "## Notes\n\nHello, World!\n\n## Music\n\nMy next paragraph",
+			expected: ["Hello, World!"]
+		}
+	];
+
+	test.each(notesCases)(
+		"saves any existing notes from the current version",
+		async ({ input, expected }: { input: string; expected: string[] }) => {
+			const fsMock = buildFsMock({ readFile: input });
+			const sut = buildSut(fsMock);
+
+			const details = buildArtistDetails();
+
+			await sut.process(details);
+
+			const notes = sut.getNotes();
+
+			expect(notes).toEqual(expected);
+		});
+
+
+	test("saves releases into groups based on type", async () => {
+		const fsMock = buildFsMock();
 		const sut = buildSut(fsMock);
 
-		const details = buildArtistDetails();
+		const album = {
+			title: "First Album",
+			id: "first-album",
+			"first-release-date": "",
+			"primary-type": "Album",
+			"secondary-types": []
+		};
+
+		const ep = {
+			title: "First EP",
+			id: "first-ep",
+			"first-release-date": "",
+			"primary-type": "EP",
+			"secondary-types": []
+
+		};
+
+		const details = buildArtistDetails({
+			releaseGroups: [album, ep]
+		});
 
 		await sut.process(details);
 
-		const notes = sut.getNotes();
+		const releases = sut.getReleases();
 
-		expect(notes).toEqual(["Hello World!"]);
+		expect(Object.keys(releases).length).toBe(2);
+
+		const albumReleases = releases["Album"];
+		expect(albumReleases).toBeTruthy();
+
+		expect(albumReleases).toEqual([album]);
+
+		const epReleases = releases["EP"];
+		expect(epReleases).toBeTruthy();
+
+		expect(epReleases).toEqual([ep]);
 	});
 });
 

@@ -33,7 +33,7 @@ export default class ArtistDetailsFile {
 
 	private _properties: FileProperties = defaultProperties();
 	private _notes: string[] = [];
-	private _releases: Record<string, ReleaseGroup[]>[] = [];
+	private _releases: Record<string, ReleaseGroup[]> = {};
 
 	constructor(filePath: string, fileSystem: IFileSystem) {
 		this._filePath = filePath;
@@ -48,7 +48,7 @@ export default class ArtistDetailsFile {
 		return this._notes;
 	}
 
-	public getReleases(): Record<string, ReleaseGroup[]>[] {
+	public getReleases(): Record<string, ReleaseGroup[]> {
 		return this._releases;
 	}
 
@@ -101,9 +101,6 @@ export default class ArtistDetailsFile {
 		const notesNode = getIndexOfHeader(ast, "Notes");
 		const musicNode = getIndexOfHeader(ast, "Music");
 
-		console.log(notesNode);
-		console.log(musicNode);
-
 		let notesSrc: RootContent[] = [];
 		if (notesNode >= 0 && musicNode < 0) {
 			notesSrc = ast.children.slice(notesNode + 1);
@@ -117,5 +114,13 @@ export default class ArtistDetailsFile {
 				.filter((node) => node.type === "text")
 				.map((node) => node.value),
 		);
+
+		const primaryTypes = new Set(artistDetails["release-groups"].map(grp => grp["primary-type"]));
+
+		primaryTypes.forEach(typ => {
+			const releasesOfType = artistDetails["release-groups"].filter(grp => grp["primary-type"] === typ);
+
+			this._releases[typ] = releasesOfType;
+		});
 	}
 }

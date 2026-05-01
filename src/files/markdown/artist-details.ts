@@ -4,8 +4,8 @@ import { IFileSystem } from "@/files/filesystem";
 import { Root, RootContent } from "mdast";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkParse from "remark-parse";
-import { YAML } from "bun";
 import { getIndexOfHeader } from "./utils";
+import { parseYaml } from "@/utils/yaml";
 
 export type FileProperties = {
 	"added-on": Date | string | null;
@@ -57,16 +57,13 @@ export default class ArtistDetailsFile {
 		const processor = unified().use(remarkParse).use(remarkFrontmatter);
 		const ast = processor.parse(currentData);
 
-		this.processProperties(ast, artistDetails);
+		await this.processProperties(ast, artistDetails);
 		this.processBody(ast, artistDetails);
 	}
 
-	private processProperties(ast: Root, artistDetails: ArtistDetails): void {
+	private async processProperties(ast: Root, artistDetails: ArtistDetails): Promise<void> {
 		const propertyNode = ast.children.find((node) => node.type === "yaml");
-		const propertyData =
-			propertyNode && propertyNode.value
-				? (YAML.parse(propertyNode.value) as FileProperties)
-				: null;
+		const propertyData = propertyNode ? await parseYaml<FileProperties>(propertyNode.value) : null;
 
 		let addedOn = new Date();
 		if (propertyNode && propertyData && propertyData["added-on"]) {

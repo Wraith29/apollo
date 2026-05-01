@@ -8,6 +8,7 @@ export class FileNotFoundError extends Error {
 
 export interface IFileSystem {
 	readFile(path: string): Promise<string>;
+	getAllFolders(): string[];
 }
 
 export class FileSystem implements IFileSystem {
@@ -24,5 +25,11 @@ export class FileSystem implements IFileSystem {
 		}
 
 		return this._vault.cachedRead(file);
+	}
+
+	public getAllFolders(): string[] {
+		const vaultFolders = this._vault.getAllFolders(true);
+
+		return vaultFolders.map(folder => folder.path);
 	}
 }

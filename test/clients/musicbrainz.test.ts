@@ -24,7 +24,7 @@ describe("getArtistDetails", () => {
         await sut.getArtistDetails("any-mbid");
         const secondCall = sut.getLastCall()
 
-        console.log(firstCall, secondCall);
+        expect(secondCall-firstCall).toBeGreaterThanOrEqual(sut.getMinDelay());
     });
 });
 

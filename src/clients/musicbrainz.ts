@@ -1,6 +1,6 @@
 import { ArtistDetails } from "@/types/musicbrainz";
 import { IHttpClient } from "./http";
-import { sleepSync } from "bun";
+import { sleep } from "@/utils/sleep";
 
 export interface IMusicbrainzClient {
     getArtistDetails(mbid: string): Promise<ArtistDetails>
@@ -17,12 +17,16 @@ export class MusicbrainzClient implements IMusicbrainzClient {
         this._client = client;
     }
 
+    public getMinDelay(): number {
+        return this._minDelayMs;
+    }
+
     public getLastCall(): number {
         return this._lastCall;
     }
 
     public async getArtistDetails(mbid: string): Promise<ArtistDetails> {
-        this.ensureMinDelayIsMet();
+        await this.ensureMinDelayIsMet();
 
         const includes = ["release-groups", "url-rels"].join("+");
         const url = `${this._baseUrl}/${mbid}?${includes}`;
@@ -48,7 +52,7 @@ export class MusicbrainzClient implements IMusicbrainzClient {
 
         if (minTime > now) {
             const diff = minTime - now;
-            sleepSync(diff);
+            await sleep(diff);
         }
     }
 }

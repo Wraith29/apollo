@@ -29,7 +29,7 @@ export class MusicbrainzClient implements IMusicbrainzClient {
         await this.ensureMinDelayIsMet();
 
         const includes = ["release-groups", "url-rels"].join("+");
-        const url = `${this._baseUrl}/${mbid}?${includes}`;
+        const url = `${this._baseUrl}/artist/${mbid}?inc=${includes}`;
 
         const request = {
             method: "GET",

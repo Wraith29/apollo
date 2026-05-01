@@ -3,6 +3,7 @@ import { ApolloSettings, ApolloSettingsTab, DEFAULT_SETTINGS } from "./settings"
 import { IFileSystem, FileSystem } from "@/files/filesystem";
 import { HttpClient, IHttpClient } from "@/clients/http";
 import { MusicbrainzClient } from "@/clients/musicbrainz";
+import { addArtist } from "@/core/commands/add-artist";
 
 export default class ApolloPlugin extends Plugin {
     public settings: ApolloSettings = DEFAULT_SETTINGS;
@@ -17,6 +18,7 @@ export default class ApolloPlugin extends Plugin {
             id: "add-artist",
             name: "Add artist",
             callback: () => {
+                addArtist(this.app, this.settings, this._fileSystem, this._musicbrainzClient);
             }
         });
 

@@ -30,6 +30,6 @@ export class FileSystem implements IFileSystem {
 	public getAllFolders(): string[] {
 		const vaultFolders = this._vault.getAllFolders(true);
 
-		return vaultFolders.map(folder => folder.path);
+		return vaultFolders.map((folder) => folder.path);
 	}
 }

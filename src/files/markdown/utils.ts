@@ -1,4 +1,4 @@
-import { Root } from "mdast";
+import type { Root } from "mdast";
 
 export function getIndexOfHeader(tree: Root, header: string): number {
 	return tree.children.findIndex((node) => {

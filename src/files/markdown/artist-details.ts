@@ -1,11 +1,11 @@
-import { unified } from "unified";
-import { ArtistDetails, ReleaseGroup } from "@/types/musicbrainz";
-import { IFileSystem } from "@/files/filesystem";
-import { Root, RootContent } from "mdast";
+import type { Root, RootContent } from "mdast";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkParse from "remark-parse";
-import { getIndexOfHeader } from "./utils";
+import { unified } from "unified";
+import type { IFileSystem } from "@/files/filesystem";
+import type { ArtistDetails, ReleaseGroup } from "@/types/musicbrainz";
 import { parseYaml } from "@/utils/yaml";
+import { getIndexOfHeader } from "./utils";
 
 export type FileProperties = {
 	"added-on": Date | string | null;
@@ -61,9 +61,14 @@ export default class ArtistDetailsFile {
 		this.processBody(ast, artistDetails);
 	}
 
-	private async processProperties(ast: Root, artistDetails: ArtistDetails): Promise<void> {
+	private async processProperties(
+		ast: Root,
+		artistDetails: ArtistDetails,
+	): Promise<void> {
 		const propertyNode = ast.children.find((node) => node.type === "yaml");
-		const propertyData = propertyNode ? await parseYaml<FileProperties>(propertyNode.value) : null;
+		const propertyData = propertyNode
+			? await parseYaml<FileProperties>(propertyNode.value)
+			: null;
 
 		let addedOn = new Date();
 		if (propertyNode && propertyData && propertyData["added-on"]) {
@@ -73,16 +78,14 @@ export default class ArtistDetailsFile {
 		const spotifyUrl =
 			artistDetails.relations
 				.filter((rel) => rel.type === "free streaming")
-				.find((rel) =>
-					rel.url.resource.startsWith("https://open.spotify.com"),
-				)?.url.resource ?? null;
+				.find((rel) => rel.url.resource.startsWith("https://open.spotify.com"))
+				?.url.resource ?? null;
 
 		const instagramUrl =
 			artistDetails.relations
 				.filter((rel) => rel.type === "social network")
-				.find((rel) =>
-					rel.url.resource.startsWith("https://www.instagram.com"),
-				)?.url.resource ?? null;
+				.find((rel) => rel.url.resource.startsWith("https://www.instagram.com"))
+				?.url.resource ?? null;
 
 		this._properties = {
 			"added-on": addedOn,
@@ -112,10 +115,14 @@ export default class ArtistDetailsFile {
 				.map((node) => node.value),
 		);
 
-		const primaryTypes = new Set(artistDetails["release-groups"].map(grp => grp["primary-type"]));
+		const primaryTypes = new Set(
+			artistDetails["release-groups"].map((grp) => grp["primary-type"]),
+		);
 
-		primaryTypes.forEach(typ => {
-			const releasesOfType = artistDetails["release-groups"].filter(grp => grp["primary-type"] === typ);
+		primaryTypes.forEach((typ) => {
+			const releasesOfType = artistDetails["release-groups"].filter(
+				(grp) => grp["primary-type"] === typ,
+			);
 
 			this._releases[typ] = releasesOfType;
 		});

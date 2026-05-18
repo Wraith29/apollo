@@ -1,4 +1,4 @@
-import type { App } from "obsidian";
+import { normalizePath, type App } from "obsidian";
 import type { IMusicbrainzClient } from "@/clients/musicbrainz";
 import type { IFileSystem } from "@/files/filesystem";
 import {
@@ -6,6 +6,8 @@ import {
 	type OnSubmitFn,
 } from "../components/add-artist-modal";
 import type { ApolloSettings } from "../settings";
+import ArtistDetailsFile from "@/files/markdown/artist-details";
+import path from "path";
 
 export function addArtist(
 	app: App,
@@ -31,7 +33,13 @@ function createAddArtistHandler(
 		const musicbrainzId = extractMbidFromUrl(musicbrainzUrl);
 		const artistDetails = await mbClient.getArtistDetails(musicbrainzId);
 
-		console.log(artistDetails);
+		const artistFilePath = normalizePath(
+			path.join(cfg.dataRoot, "Artists", artistDetails.name + ".md"),
+		);
+
+		const detailsFile = new ArtistDetailsFile(artistFilePath, fs);
+		await detailsFile.process(artistDetails);
+		detailsFile.save();
 	};
 }
 

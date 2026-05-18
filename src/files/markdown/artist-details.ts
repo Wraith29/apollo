@@ -4,8 +4,16 @@ import remarkParse from "remark-parse";
 import { unified } from "unified";
 import type { IFileSystem } from "@/files/filesystem";
 import type { ArtistDetails, ReleaseGroup } from "@/types/musicbrainz";
-import { parseYaml } from "@/utils/yaml";
-import { getIndexOfHeader } from "./utils";
+import {
+	buildHeading,
+	buildLink,
+	buildList,
+	buildListItem,
+	buildParagraph,
+	buildText,
+	getIndexOfHeader,
+} from "./utils";
+import remarkStringify from "remark-stringify";
 
 export type FileProperties = {
 	"added-on": Date | string | null;
@@ -57,35 +65,119 @@ export default class ArtistDetailsFile {
 		const processor = unified().use(remarkParse).use(remarkFrontmatter);
 		const ast = processor.parse(currentData);
 
-		await this.processProperties(ast, artistDetails);
+		await this.processProperties(artistDetails);
 		this.processBody(ast, artistDetails);
 	}
 
+	public save(): void {
+		this._fileSystem.ensureFileExists(this._filePath);
+
+		const processor = unified().use(remarkStringify);
+		const ast = this.buildTree();
+
+		const content = processor.stringify(ast);
+
+		this._fileSystem.writeFile(this._filePath, content);
+
+		// This needs to be done at the end, so that the other bits of content (Notes, music details) are already present;
+		this._fileSystem.processProperties(this._filePath, this._properties);
+	}
+
+	private buildTree(): Root {
+		return {
+			type: "root",
+			children: [...this.buildNotesNode(), ...this.buildMusicNode()],
+		};
+	}
+
+	private buildNotesNode(): RootContent[] {
+		const paragraphs = this._notes.map((note) =>
+			buildParagraph([buildText(note)]),
+		);
+		return [buildHeading("Notes", 2), ...paragraphs];
+	}
+
+	private buildMusicNode(): RootContent[] {
+		const releaseTypeNodes = [];
+
+		for (const [releaseType, values] of Object.entries(this._releases)) {
+			const releasesList = buildList(
+				values.map((release) => {
+					const link = `https://musicbrainz.org/release-group/${release.id}`;
+					const firstRelease = new Date(
+						release["first-release-date"],
+					);
+
+					const detailsNodes = [
+						buildListItem([
+							buildParagraph([
+								buildText(
+									`Release Date: ${firstRelease.toLocaleDateString()}`,
+								),
+							]),
+						]),
+						buildListItem([
+							buildParagraph([
+								buildText(
+									`Primary Type: ${release["primary-type"]}`,
+								),
+							]),
+						]),
+					];
+
+					if (release["secondary-types"].length > 0) {
+						const joined = release["secondary-types"].join(", ");
+						detailsNodes.push(
+							buildListItem([
+								buildParagraph([buildText(joined)]),
+							]),
+						);
+					}
+
+					return buildListItem([
+						buildParagraph([
+							buildLink(link, [buildText(release.title)]),
+						]),
+						buildList(detailsNodes),
+					]);
+				}),
+			);
+
+			releaseTypeNodes.push(
+				buildHeading(`${releaseType}s`, 3),
+				releasesList,
+			);
+		}
+
+		return [buildHeading("Music", 2), ...releaseTypeNodes];
+	}
+
 	private async processProperties(
-		ast: Root,
 		artistDetails: ArtistDetails,
 	): Promise<void> {
-		const propertyNode = ast.children.find((node) => node.type === "yaml");
-		const propertyData = propertyNode
-			? await parseYaml<FileProperties>(propertyNode.value)
-			: null;
+		const existingProperties =
+			await this._fileSystem.parseProperties<FileProperties>(
+				this._filePath,
+			);
 
 		let addedOn = new Date();
-		if (propertyNode && propertyData && propertyData["added-on"]) {
-			addedOn = new Date(propertyData["added-on"]);
+		if (existingProperties && existingProperties["added-on"]) {
+			addedOn = new Date(existingProperties["added-on"]);
 		}
 
 		const spotifyUrl =
 			artistDetails.relations
 				.filter((rel) => rel.type === "free streaming")
-				.find((rel) => rel.url.resource.startsWith("https://open.spotify.com"))
-				?.url.resource ?? null;
+				.find((rel) =>
+					rel.url.resource.startsWith("https://open.spotify.com"),
+				)?.url.resource ?? null;
 
 		const instagramUrl =
 			artistDetails.relations
 				.filter((rel) => rel.type === "social network")
-				.find((rel) => rel.url.resource.startsWith("https://www.instagram.com"))
-				?.url.resource ?? null;
+				.find((rel) =>
+					rel.url.resource.startsWith("https://www.instagram.com"),
+				)?.url.resource ?? null;
 
 		this._properties = {
 			"added-on": addedOn,

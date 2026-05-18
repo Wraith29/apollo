@@ -1,6 +1,6 @@
-import { IFileSystem } from "@/files/filesystem";
-import ArtistDetailsFile from "@/files/markdown/artist-details";
 import { beforeAll, describe, expect, setSystemTime, test } from "bun:test";
+import type { IFileSystem } from "@/files/filesystem";
+import ArtistDetailsFile from "@/files/markdown/artist-details";
 import { buildArtistDetails } from "~/util/data";
 import { buildFsMock } from "~/util/mocks";
 
@@ -166,16 +166,16 @@ describe("process", () => {
 	const notesCases = [
 		{
 			input: "## Notes\n\nHello, World!",
-			expected: ["Hello, World!"]
+			expected: ["Hello, World!"],
 		},
 		{
 			input: "## Notes\n\nHello, World!\n\nHi again :)",
-			expected: ["Hello, World!", "Hi again :)"]
+			expected: ["Hello, World!", "Hi again :)"],
 		},
 		{
 			input: "## Notes\n\nHello, World!\n\n## Music\n\nMy next paragraph",
-			expected: ["Hello, World!"]
-		}
+			expected: ["Hello, World!"],
+		},
 	];
 
 	test.each(notesCases)(
@@ -191,8 +191,8 @@ describe("process", () => {
 			const notes = sut.getNotes();
 
 			expect(notes).toEqual(expected);
-		});
-
+		},
+	);
 
 	test("saves releases into groups based on type", async () => {
 		const fsMock = buildFsMock();
@@ -203,7 +203,7 @@ describe("process", () => {
 			id: "first-album",
 			"first-release-date": "",
 			"primary-type": "Album",
-			"secondary-types": []
+			"secondary-types": [],
 		};
 
 		const ep = {
@@ -211,12 +211,11 @@ describe("process", () => {
 			id: "first-ep",
 			"first-release-date": "",
 			"primary-type": "EP",
-			"secondary-types": []
-
+			"secondary-types": [],
 		};
 
 		const details = buildArtistDetails({
-			releaseGroups: [album, ep]
+			releaseGroups: [album, ep],
 		});
 
 		await sut.process(details);

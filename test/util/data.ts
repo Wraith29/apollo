@@ -1,4 +1,8 @@
-import { ArtistDetails, Relation, ReleaseGroup } from "@/types/musicbrainz";
+import type {
+	ArtistDetails,
+	Relation,
+	ReleaseGroup,
+} from "@/types/musicbrainz";
 
 export function buildArtistDetails({
 	id = "1234-5678",

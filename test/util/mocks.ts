@@ -1,26 +1,31 @@
-import { IHttpClient } from "@/clients/http";
-import { IFileSystem } from "@/files/filesystem";
 import { mock } from "bun:test";
-import { RequestUrlParam } from "obsidian";
+import type { IFileSystem } from "@/files/filesystem";
+import { IHttpClient } from "@/clients/http";
+import type { RequestUrlParam } from "obsidian";
 
 export function buildFsMock({
 	readFile = "",
+	getAllFolders = [],
 }: {
 	readFile?: string;
+	getAllFolders?: string[];
 } = {}): IFileSystem {
+	const mockReadFile = mock(async ({}: string): Promise<string> => readFile);
+
 	return {
-		readFile: mock(async (_: string) => readFile),
+		readFile: mockReadFile,
+		getAllFolders: mock((): string[] => getAllFolders),
 	};
 }
 
-export class HttpClientMock implements IHttpClient {
-	private _httpGetResponse: any;
+export class HttpClientMock<TGet> implements IHttpClient {
+	private _httpGetResult: TGet;
 
-	public setGetResponse<T>(obj: T): void {
-		this._httpGetResponse = obj;
+	public async httpGet<T = TGet>({}: RequestUrlParam): Promise<T> {
+		return this._httpGetResult as unknown as T;
 	}
 
-	public async httpGet<T>(request: RequestUrlParam): Promise<T> {
-		return this._httpGetResponse;
+	public setHttpGet<T extends TGet>(result: T): void {
+		this._httpGetResult = result;
 	}
 }

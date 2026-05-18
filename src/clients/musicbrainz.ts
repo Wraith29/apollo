@@ -25,6 +25,10 @@ export class MusicbrainzClient implements IMusicbrainzClient {
 		return this._lastCall;
 	}
 
+	public getBaseUrl(): string {
+		return this._baseUrl;
+	}
+
 	public async getArtistDetails(mbid: string): Promise<ArtistDetails> {
 		await this.ensureMinDelayIsMet();
 

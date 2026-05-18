@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test, spyOn } from "bun:test";
 import type { IHttpClient } from "@/clients/http";
 import { MusicbrainzClient } from "@/clients/musicbrainz";
 import { HttpClientMock } from "~/util/mocks";
@@ -28,6 +28,27 @@ describe("getArtistDetails", () => {
 		expect(secondCall - firstCall).toBeGreaterThanOrEqual(
 			sut.getMinDelay(),
 		);
+	});
+
+	test("correctly builds the request for httpClient", async () => {
+		const client = new HttpClientMock();
+		const httpGetSpy = spyOn(client, "httpGet");
+
+		const sut = buildSut({ httpClient: client });
+
+		await sut.getArtistDetails("my-mbid");
+
+		const expectedUrl = `https://musicbrainz.org/ws/2/artist/my-mbid?inc=release-groups+url-rels`;
+
+		expect(httpGetSpy).toHaveBeenCalledWith({
+			method: "GET",
+			url: expectedUrl,
+			headers: {
+				"User-Agent":
+					"ObsidianMusicManager/1.0.0 (i.acnaylor@gmail.com)",
+				Accept: "application/json",
+			},
+		});
 	});
 
 	test("when the httpClient call success, return the data provided", async () => {

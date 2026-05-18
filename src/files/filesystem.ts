@@ -12,6 +12,7 @@ export interface IFileSystem {
 	writeFile(path: string, content: string): Promise<void>;
 
 	getAllFolders(): string[];
+	getFilesInFolder(path: string): string[];
 
 	parseProperties<T>(path: string): Promise<T | null>;
 	processProperties<T>(path: string, data: T): void;
@@ -59,6 +60,15 @@ export class FileSystem implements IFileSystem {
 		const vaultFolders = this._vault.getAllFolders(true);
 
 		return vaultFolders.map((folder) => folder.path);
+	}
+
+	public getFilesInFolder(path: string): string[] {
+		const folder = this._vault.getFolderByPath(path);
+		if (!folder) {
+			return [];
+		}
+
+		return folder.children.map((file) => file.path);
 	}
 
 	public async parseProperties<T>(path: string): Promise<T | null> {

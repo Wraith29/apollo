@@ -11,9 +11,14 @@ import {
 
 export default class ApolloPlugin extends Plugin {
 	public settings: ApolloSettings = DEFAULT_SETTINGS;
-	private readonly _fileSystem: IFileSystem = new FileSystem(this.app.vault);
+	private readonly _fileSystem: IFileSystem = new FileSystem(
+		this.app.vault,
+		this.app.fileManager,
+	);
 	private readonly _httpClient: IHttpClient = new HttpClient();
-	private readonly _musicbrainzClient = new MusicbrainzClient(this._httpClient);
+	private readonly _musicbrainzClient = new MusicbrainzClient(
+		this._httpClient,
+	);
 
 	public async onload(): Promise<void> {
 		await this.loadSettings();
@@ -31,7 +36,9 @@ export default class ApolloPlugin extends Plugin {
 			},
 		});
 
-		this.addSettingTab(new ApolloSettingsTab(this.app, this, this._fileSystem));
+		this.addSettingTab(
+			new ApolloSettingsTab(this.app, this, this._fileSystem),
+		);
 	}
 
 	private async loadSettings(): Promise<void> {

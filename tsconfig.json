@@ -4,7 +4,6 @@
 		"inlineSources": true,
 		"module": "ESNext",
 		"target": "ES6",
-		"allowJs": true,
 		"noImplicitAny": true,
 		"noImplicitThis": true,
 		"noImplicitReturns": true,
@@ -20,8 +19,8 @@
 		"esModuleInterop": true,
 		"paths": {
 			"@/*": ["./src/*"],
-			"~/*": ["./test/*"]
-		}
+			"~/*": ["./test/*"],
+		},
 	},
-	"include": ["src/**/*.ts", "test/**/*.ts"]
+	"include": ["src/**/*.ts", "test/**/*.ts"],
 }

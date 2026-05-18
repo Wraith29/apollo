@@ -17,14 +17,13 @@ export function addArtist(
 ): void {
 	const modal = new AddArtistModal(
 		app,
-		createAddArtistHandler(app, cfg, fs, mbClient),
+		createAddArtistHandler(cfg, fs, mbClient),
 	);
 
 	modal.open();
 }
 
 function createAddArtistHandler(
-	app: App,
 	cfg: ApolloSettings,
 	fs: IFileSystem,
 	mbClient: IMusicbrainzClient,

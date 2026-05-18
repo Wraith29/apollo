@@ -1,4 +1,4 @@
-[test]
-coverage = true
-coverageReporter = ["lcov"]
-coverageSkipTestFiles = true
+# [test]
+# coverage = true
+# coverageReporter = ["lcov"]
+# coverageSkipTestFiles = true

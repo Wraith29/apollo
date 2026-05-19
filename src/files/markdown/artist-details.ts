@@ -129,7 +129,9 @@ export default class ArtistDetailsFile {
 						const joined = release["secondary-types"].join(", ");
 						detailsNodes.push(
 							buildListItem([
-								buildParagraph([buildText(joined)]),
+								buildParagraph([
+									buildText(`Secondary Types: ${joined}`),
+								]),
 							]),
 						);
 					}

@@ -46,18 +46,8 @@ export default class ArtistDetailsFile {
 	constructor(filePath: string, fileSystem: IFileSystem) {
 		this._filePath = filePath;
 		this._fileSystem = fileSystem;
-	}
 
-	public getProperties(): FileProperties {
-		return this._properties;
-	}
-
-	public getNotes(): string[] {
-		return this._notes;
-	}
-
-	public getReleases(): Record<string, ReleaseGroup[]> {
-		return this._releases;
+		this._fileSystem.ensureFileExists(this._filePath);
 	}
 
 	public async process(artistDetails: ArtistDetails): Promise<void> {
@@ -70,8 +60,6 @@ export default class ArtistDetailsFile {
 	}
 
 	public save(): void {
-		this._fileSystem.ensureFileExists(this._filePath);
-
 		const processor = unified().use(remarkStringify);
 		const ast = this.buildTree();
 

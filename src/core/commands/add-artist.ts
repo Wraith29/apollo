@@ -15,6 +15,8 @@ export function addArtist(
 	fs: IFileSystem,
 	mbClient: IMusicbrainzClient,
 ): void {
+	fs.ensureFolderExists(normalizePath(path.join(cfg.dataRoot, "Artists")));
+
 	const modal = new AddArtistModal(
 		app,
 		createAddArtistHandler(cfg, fs, mbClient),

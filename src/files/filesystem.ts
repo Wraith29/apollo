@@ -8,6 +8,8 @@ export class FileNotFoundError extends Error {
 
 export interface IFileSystem {
 	ensureFileExists(path: string): void;
+	ensureFolderExists(path: string): void;
+
 	readFile(path: string): Promise<string>;
 	writeFile(path: string, content: string): Promise<void>;
 	openFile(path: string): Promise<void>;
@@ -33,6 +35,19 @@ export class FileSystem implements IFileSystem {
 		}
 
 		this._vault.create(path, "");
+	}
+
+	public ensureFolderExists(path: string): void {
+		const folder = this._vault.getFolderByPath(path);
+		if (folder) {
+			return;
+		}
+
+		try {
+			this._vault.createFolder(path);
+		} catch {
+			// This shouldn't happen, but is technically possible
+		}
 	}
 
 	public async readFile(path: string): Promise<string> {

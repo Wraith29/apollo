@@ -9,6 +9,7 @@ import {
 	DEFAULT_SETTINGS,
 } from "./settings";
 import { updateArtists } from "./commands/update-artists";
+import { recommendAlbum } from "./commands/recommend-album";
 
 export default class ApolloPlugin extends Plugin {
 	public settings: ApolloSettings = DEFAULT_SETTINGS;
@@ -47,6 +48,14 @@ export default class ApolloPlugin extends Plugin {
 					this._fileSystem,
 					this._musicbrainzClient,
 				);
+			},
+		});
+
+		this.addCommand({
+			id: "recommend-album",
+			name: "Recommend album",
+			callback: () => {
+				recommendAlbum(this.settings, this._fileSystem);
 			},
 		});
 

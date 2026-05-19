@@ -29,8 +29,8 @@ export default class ApolloPlugin extends Plugin {
 		this.addCommand({
 			id: "add-artist",
 			name: "Add artist",
-			callback: () => {
-				addArtist(
+			callback: async () => {
+				await addArtist(
 					this.app,
 					this.settings,
 					this._fileSystem,

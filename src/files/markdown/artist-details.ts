@@ -46,11 +46,11 @@ export default class ArtistDetailsFile {
 	constructor(filePath: string, fileSystem: IFileSystem) {
 		this._filePath = filePath;
 		this._fileSystem = fileSystem;
-
-		this._fileSystem.ensureFileExists(this._filePath);
 	}
 
 	public async process(artistDetails: ArtistDetails): Promise<void> {
+		await this._fileSystem.ensureFileExists(this._filePath);
+
 		const currentData = await this._fileSystem.readFile(this._filePath);
 		const processor = unified().use(remarkParse).use(remarkFrontmatter);
 		const ast = processor.parse(currentData);
@@ -60,6 +60,8 @@ export default class ArtistDetailsFile {
 	}
 
 	public async save(): Promise<void> {
+		await this._fileSystem.ensureFileExists(this._filePath);
+
 		const processor = unified().use(remarkStringify);
 		const ast = this.buildTree();
 
@@ -68,7 +70,10 @@ export default class ArtistDetailsFile {
 		await this._fileSystem.writeFile(this._filePath, content);
 
 		// This needs to be done at the end, so that the other bits of content (Notes, music details) are already present;
-		this._fileSystem.processProperties(this._filePath, this._properties);
+		await this._fileSystem.processProperties(
+			this._filePath,
+			this._properties,
+		);
 	}
 
 	private buildTree(): Root {

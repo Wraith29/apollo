@@ -7,8 +7,8 @@ export class FileNotFoundError extends Error {
 }
 
 export interface IFileSystem {
-	ensureFileExists(path: string): void;
-	ensureFolderExists(path: string): void;
+	ensureFileExists(path: string): Promise<void>;
+	ensureFolderExists(path: string): Promise<void>;
 
 	readFile(path: string): Promise<string>;
 	writeFile(path: string, content: string): Promise<void>;
@@ -18,7 +18,7 @@ export interface IFileSystem {
 	getFilesInFolder(path: string): string[];
 
 	parseProperties<T>(path: string): Promise<T | null>;
-	processProperties<T>(path: string, data: T): void;
+	processProperties(path: string, data: unknown): Promise<void>;
 }
 
 export class FileSystem implements IFileSystem {
@@ -28,23 +28,23 @@ export class FileSystem implements IFileSystem {
 		private readonly _workspace: Workspace,
 	) {}
 
-	public ensureFileExists(path: string): void {
+	public async ensureFileExists(path: string): Promise<void> {
 		const file = this._vault.getFileByPath(path);
 		if (file) {
 			return;
 		}
 
-		this._vault.create(path, "");
+		await this._vault.create(path, "");
 	}
 
-	public ensureFolderExists(path: string): void {
+	public async ensureFolderExists(path: string): Promise<void> {
 		const folder = this._vault.getFolderByPath(path);
 		if (folder) {
 			return;
 		}
 
 		try {
-			this._vault.createFolder(path);
+			await this._vault.createFolder(path);
 		} catch {
 			// This shouldn't happen, but is technically possible
 		}
@@ -60,14 +60,14 @@ export class FileSystem implements IFileSystem {
 	}
 
 	public async writeFile(path: string, content: string): Promise<void> {
-		this.ensureFileExists(path);
+		await this.ensureFileExists(path);
 
 		const file = this._vault.getFileByPath(path);
 		if (!file) {
 			throw new FileNotFoundError(path);
 		}
 
-		this._vault.modify(file, content);
+		await this._vault.modify(file, content);
 	}
 
 	public async openFile(path: string): Promise<void> {
@@ -109,22 +109,24 @@ export class FileSystem implements IFileSystem {
 		return properties;
 	}
 
-	public processProperties<T>(path: string, data: T): void {
+	public async processProperties(
+		path: string,
+		data: Record<string, Date | string | null>,
+	): Promise<void> {
 		const file = this._vault.getFileByPath(path);
 		if (!file) {
 			throw new FileNotFoundError(path);
 		}
 
 		try {
-			this._fileManager.processFrontMatter(file, (fm) => {
-				for (const key in fm) {
-					delete fm[key];
-				}
-
-				for (const key in data) {
-					fm[key] = data[key];
-				}
-			});
+			await this._fileManager.processFrontMatter(
+				file,
+				(fm: Record<string, Date | string | null>) => {
+					for (const [key, value] of Object.entries(data)) {
+						fm[key] = value;
+					}
+				},
+			);
 		} catch (err) {
 			new Notice(`Failed to process front matter for ${path}`);
 			throw err;

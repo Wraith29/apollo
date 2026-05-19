@@ -9,13 +9,13 @@ import type { ApolloSettings } from "../settings";
 import ArtistDetailsFile from "@/files/markdown/artist-details";
 import { joinAndNormalizePath } from "@/utils/path";
 
-export function addArtist(
+export async function addArtist(
 	app: App,
 	cfg: ApolloSettings,
 	fs: IFileSystem,
 	mbClient: IMusicbrainzClient,
-): void {
-	fs.ensureFolderExists(joinAndNormalizePath(cfg.dataRoot, "Artists"));
+): Promise<void> {
+	await fs.ensureFolderExists(joinAndNormalizePath(cfg.dataRoot, "Artists"));
 
 	const modal = new AddArtistModal(
 		app,

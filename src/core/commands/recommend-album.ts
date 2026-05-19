@@ -1,7 +1,7 @@
 import { IFileSystem } from "@/files/filesystem";
 import { ApolloSettings } from "@/core/settings";
-import { ReleaseGroup } from "@/types/musicbrainz";
 import { joinAndNormalizePath } from "@/utils/path";
+import ArtistDetailsFile from "@/files/markdown/artist-details";
 
 export async function recommendAlbum(
 	cfg: ApolloSettings,
@@ -9,17 +9,18 @@ export async function recommendAlbum(
 ): Promise<void> {
 	const artistFolder = joinAndNormalizePath(cfg.dataRoot, "Artists");
 	const artistFiles = fs.getFilesInFolder(artistFolder);
-	console.log({ artistFiles });
-
-	let albumData: ReleaseGroup | null = null;
 
 	// TODO: Remove this badboy
 	await Promise.resolve();
 
-	do {
-		const randomIndex = Math.floor(Math.random() * artistFiles.length);
-		const randomArtist = artistFiles[randomIndex];
-	} while (albumData === null);
+	// TODO: add a do-while
+	const randomIndex = Math.floor(Math.random() * artistFiles.length);
+	const randomArtist = artistFiles[randomIndex];
+	if (!randomArtist) {
+		throw new Error("fuck off");
+	}
 
-	console.log({ albumData });
+	const df = await ArtistDetailsFile.fromFile(randomArtist, fs);
+
+	console.error({ df });
 }

@@ -1,4 +1,4 @@
-import type { Root, RootContent } from "mdast";
+import type { Heading, Root, RootContent } from "mdast";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkParse from "remark-parse";
 import { unified } from "unified";
@@ -38,17 +38,14 @@ function defaultProperties(): FileProperties {
 }
 
 export default class ArtistDetailsFile {
-	private readonly _filePath: string;
-	private readonly _fileSystem: IFileSystem;
-
 	private _properties: FileProperties = defaultProperties();
 	private _notes: string[] = [];
 	private _releases: Record<string, ReleaseGroup[]> = {};
 
-	private constructor(filePath: string, fileSystem: IFileSystem) {
-		this._filePath = filePath;
-		this._fileSystem = fileSystem;
-	}
+	private constructor(
+		private readonly _filePath: string,
+		private readonly _fileSystem: IFileSystem,
+	) {}
 
 	public static async fromDetails(
 		filePath: string,
@@ -62,9 +59,26 @@ export default class ArtistDetailsFile {
 		const processor = unified().use(remarkParse).use(remarkFrontmatter);
 		const ast = processor.parse(currentData);
 
-		await inst.processProperties(details);
+		await inst.processPropertiesFromDetails(details);
 		inst.processNotes(ast);
 		inst.processReleasesFromDetails(details);
+
+		return inst;
+	}
+
+	public static async fromFile(
+		filePath: string,
+		fileSystem: IFileSystem,
+	): Promise<ArtistDetailsFile> {
+		const inst = new ArtistDetailsFile(filePath, fileSystem);
+		await inst.processPropertiesFromFile();
+
+		const currentData = await fileSystem.readFile(filePath);
+		const processor = unified().use(remarkParse).use(remarkFrontmatter);
+		const ast = processor.parse(currentData);
+
+		inst.processNotes(ast);
+		inst.processReleasesFromFile(ast);
 
 		return inst;
 	}
@@ -73,7 +87,7 @@ export default class ArtistDetailsFile {
 		await this._fileSystem.ensureFileExists(this._filePath);
 
 		const processor = unified().use(remarkStringify);
-		const ast = this.buildTree();
+		const ast = this.buildAst();
 
 		const content = processor.stringify(ast);
 
@@ -86,14 +100,14 @@ export default class ArtistDetailsFile {
 		);
 	}
 
-	private buildTree(): Root {
+	private buildAst(): Root {
 		return {
 			type: "root",
-			children: [...this.buildNotesNode(), ...this.buildMusicNode()],
+			children: [...this.buildNotesNodes(), ...this.buildMusicNodes()],
 		};
 	}
 
-	private buildNotesNode(): RootContent[] {
+	private buildNotesNodes(): RootContent[] {
 		const paragraphs = this._notes.map((note) =>
 			buildParagraph([buildText(note)]),
 		);
@@ -101,7 +115,7 @@ export default class ArtistDetailsFile {
 		return [buildHeading("Notes", 2), ...paragraphs];
 	}
 
-	private buildMusicNode(): RootContent[] {
+	private buildMusicNodes(): RootContent[] {
 		const releaseTypeNodes = [];
 
 		for (const [releaseType, values] of Object.entries(this._releases)) {
@@ -158,10 +172,21 @@ export default class ArtistDetailsFile {
 		return [buildHeading("Music", 2), ...releaseTypeNodes];
 	}
 
+	private async processPropertiesFromFile(): Promise<void> {
+		const properties =
+			await this._fileSystem.parseProperties<FileProperties>(
+				this._filePath,
+			);
+
+		if (properties) {
+			this._properties = properties;
+		}
+	}
+
 	// This will set the properties from the source of truth (Musicbrainz)
 	// However, the `added-date` and `tags` are retained from the current data,
 	// as these are user-set and personal
-	private async processProperties(
+	private async processPropertiesFromDetails(
 		artistDetails: ArtistDetails,
 	): Promise<void> {
 		const existingProperties =
@@ -175,7 +200,7 @@ export default class ArtistDetailsFile {
 		}
 
 		let tags: string[] = [];
-		if (existingProperties && existingProperties.tags) {
+		if (existingProperties) {
 			tags = existingProperties.tags;
 		}
 
@@ -235,5 +260,34 @@ export default class ArtistDetailsFile {
 
 			this._releases[typ] = releasesOfType;
 		});
+	}
+
+	private processReleasesFromFile(ast: Root): void {
+		const musicNodeIndex = getIndexOfHeader(ast, "Music");
+		if (musicNodeIndex < 0) {
+			return;
+		}
+
+		const nodesBelowMusicHeader = ast.children.slice(musicNodeIndex + 1);
+
+		const releaseTypeNames = nodesBelowMusicHeader
+			.filter((node) => node.type === "heading" && node.depth === 3)
+			.map((node) => node as Heading)
+			.filter((node) =>
+				node.children.find((child) => child.type === "text"),
+			)
+			.map((node) => {
+				const textNode = node.children.find(
+					(child) => child.type === "text",
+				);
+				if (!textNode) {
+					return null;
+				}
+
+				return textNode.value;
+			})
+			.filter((name) => name !== null);
+
+		console.error({ releaseTypeNames });
 	}
 }

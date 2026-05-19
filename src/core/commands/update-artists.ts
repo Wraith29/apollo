@@ -15,8 +15,6 @@ export async function updateArtists(
 
 	for (const file of artistFiles) {
 		try {
-			console.info({ message: "Updating artist at path", path: file });
-
 			await updateArtist(file, fs, mbClient);
 		} catch (error) {
 			console.error({

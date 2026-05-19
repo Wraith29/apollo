@@ -40,8 +40,11 @@ function createAddArtistHandler(
 			`${artistDetails.name}.md`,
 		);
 
-		const detailsFile = new ArtistDetailsFile(artistFilePath, fs);
-		await detailsFile.process(artistDetails);
+		const detailsFile = await ArtistDetailsFile.fromDetails(
+			artistFilePath,
+			fs,
+			artistDetails,
+		);
 		await detailsFile.save();
 
 		await fs.openFile(artistFilePath);

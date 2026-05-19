@@ -5,6 +5,7 @@ import type {
 	Link,
 	List,
 	ListItem,
+	ListItemData,
 	Paragraph,
 	PhrasingContent,
 	Root,

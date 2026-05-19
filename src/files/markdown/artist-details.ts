@@ -94,6 +94,7 @@ export default class ArtistDetailsFile {
 		const paragraphs = this._notes.map((note) =>
 			buildParagraph([buildText(note)]),
 		);
+
 		return [buildHeading("Notes", 2), ...paragraphs];
 	}
 

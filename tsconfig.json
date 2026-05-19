@@ -21,6 +21,7 @@
 			"@/*": ["./src/*"],
 			"~/*": ["./test/*"],
 		},
+		"types": ["node", "bun"],
 	},
 	"include": ["src/**/*.ts", "test/**/*.ts"],
 }

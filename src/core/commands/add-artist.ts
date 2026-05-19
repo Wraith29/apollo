@@ -7,7 +7,7 @@ import {
 } from "../components/add-artist-modal";
 import type { ApolloSettings } from "../settings";
 import ArtistDetailsFile from "@/files/markdown/artist-details";
-import path from "path";
+import { joinAndNormalizePath } from "@/utils/path";
 
 export function addArtist(
 	app: App,
@@ -15,7 +15,7 @@ export function addArtist(
 	fs: IFileSystem,
 	mbClient: IMusicbrainzClient,
 ): void {
-	fs.ensureFolderExists(normalizePath(path.join(cfg.dataRoot, "Artists")));
+	fs.ensureFolderExists(joinAndNormalizePath(cfg.dataRoot, "Artists"));
 
 	const modal = new AddArtistModal(
 		app,
@@ -34,8 +34,10 @@ function createAddArtistHandler(
 		const musicbrainzId = extractMbidFromUrl(musicbrainzUrl);
 		const artistDetails = await mbClient.getArtistDetails(musicbrainzId);
 
-		const artistFilePath = normalizePath(
-			path.join(cfg.dataRoot, "Artists", artistDetails.name + ".md"),
+		const artistFilePath = joinAndNormalizePath(
+			cfg.dataRoot,
+			"Artists",
+			`${artistDetails.name}.md`,
 		);
 
 		const detailsFile = new ArtistDetailsFile(artistFilePath, fs);

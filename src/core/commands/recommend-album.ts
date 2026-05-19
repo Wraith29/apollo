@@ -10,16 +10,26 @@ export async function recommendAlbum(
 ): Promise<void> {
 	const artistFolder = normalizePath(path.join(cfg.dataRoot, "Artists"));
 	const artistFiles = fs.getFilesInFolder(artistFolder);
-
 	console.log({ artistFiles });
 
-	const albumData: ReleaseGroup | null = null;
+	let albumData: ReleaseGroup | null = null;
 
 	do {
 		const randomIndex = Math.random() * artistFiles.length;
 		const randomArtist = artistFiles[randomIndex];
-		console.log({ randomArtist });
+
+		console.log({ randomArtist, albumData });
+
+		albumData = {
+			title: "",
+			id: "",
+			"first-release-date": "",
+			"primary-type": "",
+			"secondary-types": [],
+		};
 
 		break;
 	} while (albumData === null);
+
+	console.log({ albumData });
 }

@@ -1,4 +1,4 @@
-import { Notice, type FileManager, type Vault } from "obsidian";
+import { Notice, Workspace, type FileManager, type Vault } from "obsidian";
 
 export class FileNotFoundError extends Error {
 	constructor(path: string) {
@@ -10,6 +10,7 @@ export interface IFileSystem {
 	ensureFileExists(path: string): void;
 	readFile(path: string): Promise<string>;
 	writeFile(path: string, content: string): Promise<void>;
+	openFile(path: string): Promise<void>;
 
 	getAllFolders(): string[];
 	getFilesInFolder(path: string): string[];
@@ -19,13 +20,11 @@ export interface IFileSystem {
 }
 
 export class FileSystem implements IFileSystem {
-	private _vault: Vault;
-	private _fileManager: FileManager;
-
-	constructor(vault: Vault, fileManager: FileManager) {
-		this._vault = vault;
-		this._fileManager = fileManager;
-	}
+	constructor(
+		private readonly _vault: Vault,
+		private readonly _fileManager: FileManager,
+		private readonly _workspace: Workspace,
+	) {}
 
 	public ensureFileExists(path: string): void {
 		const file = this._vault.getFileByPath(path);
@@ -54,6 +53,16 @@ export class FileSystem implements IFileSystem {
 		}
 
 		this._vault.modify(file, content);
+	}
+
+	public async openFile(path: string): Promise<void> {
+		const file = this._vault.getFileByPath(path);
+		if (!file) {
+			return;
+		}
+
+		const leaf = this._workspace.getLeaf();
+		await leaf.openFile(file);
 	}
 
 	public getAllFolders(): string[] {

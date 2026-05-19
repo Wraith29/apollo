@@ -8,12 +8,14 @@ import {
 	ApolloSettingsTab,
 	DEFAULT_SETTINGS,
 } from "./settings";
+import { updateArtists } from "./commands/update-artists";
 
 export default class ApolloPlugin extends Plugin {
 	public settings: ApolloSettings = DEFAULT_SETTINGS;
 	private readonly _fileSystem: IFileSystem = new FileSystem(
 		this.app.vault,
 		this.app.fileManager,
+		this.app.workspace,
 	);
 	private readonly _httpClient: IHttpClient = new HttpClient();
 	private readonly _musicbrainzClient = new MusicbrainzClient(
@@ -29,6 +31,18 @@ export default class ApolloPlugin extends Plugin {
 			callback: () => {
 				addArtist(
 					this.app,
+					this.settings,
+					this._fileSystem,
+					this._musicbrainzClient,
+				);
+			},
+		});
+
+		this.addCommand({
+			id: "update-artists",
+			name: "Update artists",
+			callback: () => {
+				updateArtists(
 					this.settings,
 					this._fileSystem,
 					this._musicbrainzClient,

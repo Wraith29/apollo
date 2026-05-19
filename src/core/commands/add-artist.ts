@@ -39,6 +39,8 @@ function createAddArtistHandler(
 		const detailsFile = new ArtistDetailsFile(artistFilePath, fs);
 		await detailsFile.process(artistDetails);
 		detailsFile.save();
+
+		await fs.openFile(artistFilePath);
 	};
 }
 

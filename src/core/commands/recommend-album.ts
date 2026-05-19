@@ -17,20 +17,8 @@ export async function recommendAlbum(
 	await Promise.resolve();
 
 	do {
-		const randomIndex = Math.random() * artistFiles.length;
+		const randomIndex = Math.floor(Math.random() * artistFiles.length);
 		const randomArtist = artistFiles[randomIndex];
-
-		console.log({ randomArtist, albumData });
-
-		albumData = {
-			title: "",
-			id: "",
-			"first-release-date": "",
-			"primary-type": "",
-			"secondary-types": [],
-		};
-
-		break;
 	} while (albumData === null);
 
 	console.log({ albumData });

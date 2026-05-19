@@ -22,6 +22,7 @@ export type FileProperties = {
 	"musicbrainz-url": string | null;
 	"spotify-url": string | null;
 	"instagram-url": string | null;
+	tags: string[];
 };
 
 function defaultProperties(): FileProperties {
@@ -32,6 +33,7 @@ function defaultProperties(): FileProperties {
 		"musicbrainz-url": null,
 		"spotify-url": null,
 		"instagram-url": null,
+		tags: [],
 	};
 }
 
@@ -43,20 +45,28 @@ export default class ArtistDetailsFile {
 	private _notes: string[] = [];
 	private _releases: Record<string, ReleaseGroup[]> = {};
 
-	constructor(filePath: string, fileSystem: IFileSystem) {
+	private constructor(filePath: string, fileSystem: IFileSystem) {
 		this._filePath = filePath;
 		this._fileSystem = fileSystem;
 	}
 
-	public async process(artistDetails: ArtistDetails): Promise<void> {
-		await this._fileSystem.ensureFileExists(this._filePath);
+	public static async fromDetails(
+		filePath: string,
+		fileSystem: IFileSystem,
+		details: ArtistDetails,
+	): Promise<ArtistDetailsFile> {
+		await fileSystem.ensureFileExists(filePath);
+		const inst = new ArtistDetailsFile(filePath, fileSystem);
 
-		const currentData = await this._fileSystem.readFile(this._filePath);
+		const currentData = await fileSystem.readFile(filePath);
 		const processor = unified().use(remarkParse).use(remarkFrontmatter);
 		const ast = processor.parse(currentData);
 
-		await this.processProperties(artistDetails);
-		this.processBody(ast, artistDetails);
+		await inst.processProperties(details);
+		inst.processNotes(ast);
+		inst.processReleasesFromDetails(details);
+
+		return inst;
 	}
 
 	public async save(): Promise<void> {
@@ -148,6 +158,9 @@ export default class ArtistDetailsFile {
 		return [buildHeading("Music", 2), ...releaseTypeNodes];
 	}
 
+	// This will set the properties from the source of truth (Musicbrainz)
+	// However, the `added-date` and `tags` are retained from the current data,
+	// as these are user-set and personal
 	private async processProperties(
 		artistDetails: ArtistDetails,
 	): Promise<void> {
@@ -159,6 +172,11 @@ export default class ArtistDetailsFile {
 		let addedOn = new Date();
 		if (existingProperties && existingProperties["added-on"]) {
 			addedOn = new Date(existingProperties["added-on"]);
+		}
+
+		let tags: string[] = [];
+		if (existingProperties && existingProperties.tags) {
+			tags = existingProperties.tags;
 		}
 
 		const spotifyUrl =
@@ -182,10 +200,11 @@ export default class ArtistDetailsFile {
 			"musicbrainz-url": `https://musicbrainz.org/artist/${artistDetails.id}`,
 			"spotify-url": spotifyUrl,
 			"instagram-url": instagramUrl,
+			tags: tags,
 		};
 	}
 
-	private processBody(ast: Root, artistDetails: ArtistDetails): void {
+	private processNotes(ast: Root): void {
 		const notesNode = getIndexOfHeader(ast, "Notes");
 		const musicNode = getIndexOfHeader(ast, "Music");
 
@@ -202,7 +221,9 @@ export default class ArtistDetailsFile {
 				.filter((node) => node.type === "text")
 				.map((node) => node.value),
 		);
+	}
 
+	private processReleasesFromDetails(artistDetails: ArtistDetails): void {
 		const primaryTypes = new Set(
 			artistDetails["release-groups"].map((grp) => grp["primary-type"]),
 		);

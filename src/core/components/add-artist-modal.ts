@@ -22,7 +22,7 @@ export class AddArtistModal extends Modal {
 		link.href = "https://musicbrainz.org/";
 
 		new Setting(this.contentEl)
-			.setName("Musicbrainz id")
+			.setName("Musicbrainz ID")
 			.setDesc(description)
 			.addText((inp) => inp.onChange((val: string) => (this._input = val)));
 

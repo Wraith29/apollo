@@ -59,13 +59,13 @@ export default class ArtistDetailsFile {
 		this.processBody(ast, artistDetails);
 	}
 
-	public save(): void {
+	public async save(): Promise<void> {
 		const processor = unified().use(remarkStringify);
 		const ast = this.buildTree();
 
 		const content = processor.stringify(ast);
 
-		this._fileSystem.writeFile(this._filePath, content);
+		await this._fileSystem.writeFile(this._filePath, content);
 
 		// This needs to be done at the end, so that the other bits of content (Notes, music details) are already present;
 		this._fileSystem.processProperties(this._filePath, this._properties);

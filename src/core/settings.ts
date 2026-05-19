@@ -44,7 +44,7 @@ export class ApolloSettingsTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Setlist api key")
+			.setName("Setlist API key")
 			.setDesc("Select a secret from your storage for setlist.fm")
 			.addComponent((el) =>
 				new SecretComponent(this.app, el)

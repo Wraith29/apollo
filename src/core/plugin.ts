@@ -42,8 +42,8 @@ export default class ApolloPlugin extends Plugin {
 		this.addCommand({
 			id: "update-artists",
 			name: "Update artists",
-			callback: () => {
-				updateArtists(
+			callback: async () => {
+				await updateArtists(
 					this.settings,
 					this._fileSystem,
 					this._musicbrainzClient,
@@ -54,8 +54,8 @@ export default class ApolloPlugin extends Plugin {
 		this.addCommand({
 			id: "recommend-album",
 			name: "Recommend album",
-			callback: () => {
-				recommendAlbum(this.settings, this._fileSystem);
+			callback: async () => {
+				await recommendAlbum(this.settings, this._fileSystem);
 			},
 		});
 

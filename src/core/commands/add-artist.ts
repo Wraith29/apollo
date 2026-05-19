@@ -1,4 +1,4 @@
-import { normalizePath, type App } from "obsidian";
+import type { App } from "obsidian";
 import type { IMusicbrainzClient } from "@/clients/musicbrainz";
 import type { IFileSystem } from "@/files/filesystem";
 import {
@@ -42,7 +42,7 @@ function createAddArtistHandler(
 
 		const detailsFile = new ArtistDetailsFile(artistFilePath, fs);
 		await detailsFile.process(artistDetails);
-		detailsFile.save();
+		await detailsFile.save();
 
 		await fs.openFile(artistFilePath);
 	};

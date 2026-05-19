@@ -2,8 +2,7 @@ import { IFileSystem } from "@/files/filesystem";
 import { ApolloSettings } from "@/core/settings";
 import { IMusicbrainzClient } from "@/clients/musicbrainz";
 import ArtistDetailsFile from "@/files/markdown/artist-details";
-import { normalizePath } from "obsidian";
-import path from "path";
+import { joinAndNormalizePath } from "@/utils/path";
 
 export async function updateArtists(
 	cfg: ApolloSettings,
@@ -11,7 +10,7 @@ export async function updateArtists(
 	mbClient: IMusicbrainzClient,
 ): Promise<void> {
 	const artistFiles = fs.getFilesInFolder(
-		normalizePath(path.join(cfg.dataRoot, "Artists")),
+		joinAndNormalizePath(cfg.dataRoot, "Artists"),
 	);
 
 	for (const file of artistFiles) {
@@ -51,6 +50,5 @@ async function updateArtist(
 
 	const detailsFile = new ArtistDetailsFile(path, fs);
 	await detailsFile.process(artistDetails);
-
-	detailsFile.save();
+	await detailsFile.save();
 }

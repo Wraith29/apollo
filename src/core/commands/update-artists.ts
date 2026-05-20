@@ -46,7 +46,11 @@ async function updateArtist(
 
 	const artistDetails = await mbClient.getArtistDetails(mbid);
 
-	const detailsFile = new ArtistDetailsFile(path, fs);
-	await detailsFile.process(artistDetails);
+	const detailsFile = await ArtistDetailsFile.fromDetails(
+		path,
+		fs,
+		artistDetails,
+	);
+
 	await detailsFile.save();
 }

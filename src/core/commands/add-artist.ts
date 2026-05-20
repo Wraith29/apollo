@@ -8,6 +8,7 @@ import {
 import type { ApolloSettings } from "../settings";
 import ArtistDetailsFile from "@/files/markdown/artist-details";
 import { joinAndNormalizePath } from "@/utils/path";
+import { extractMbidFromUrl } from "@/utils/url";
 
 export async function addArtist(
 	app: App,
@@ -49,8 +50,4 @@ function createAddArtistHandler(
 
 		await fs.openFile(artistFilePath);
 	};
-}
-
-function extractMbidFromUrl(url: string): string {
-	return url.slice(url.lastIndexOf("/") + 1);
 }

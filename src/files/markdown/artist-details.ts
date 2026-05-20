@@ -1,4 +1,4 @@
-import type { Heading, Root, RootContent } from "mdast";
+import type { Heading, List, ListItem, Root, RootContent } from "mdast";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkParse from "remark-parse";
 import { unified } from "unified";
@@ -14,6 +14,7 @@ import {
 	getIndexOfHeader,
 } from "./utils";
 import remarkStringify from "remark-stringify";
+import { extractMbidFromUrl } from "@/utils/url";
 
 export type FileProperties = {
 	"added-on": Date | string | null;
@@ -270,24 +271,110 @@ export default class ArtistDetailsFile {
 
 		const nodesBelowMusicHeader = ast.children.slice(musicNodeIndex + 1);
 
-		const releaseTypeNames = nodesBelowMusicHeader
+		const headingNodes = nodesBelowMusicHeader
 			.filter((node) => node.type === "heading" && node.depth === 3)
-			.map((node) => node as Heading)
-			.filter((node) =>
-				node.children.find((child) => child.type === "text"),
-			)
-			.map((node) => {
-				const textNode = node.children.find(
-					(child) => child.type === "text",
+			.map((node) => node as Heading);
+
+		const releaseTypes = headingNodes
+			.map((node) => node.children.find((child) => child.type === "text"))
+			.filter((child) => child !== undefined)
+			.map((child) => child.value);
+
+		for (const releaseType of releaseTypes) {
+			console.log({ releaseType });
+
+			const indexOfHeader = getIndexOfHeader(ast, releaseType);
+			if (ast.children.length <= indexOfHeader) {
+				continue;
+			}
+
+			const releasesListNode = ast.children[indexOfHeader + 1];
+			if (!releasesListNode || releasesListNode.type !== "list") {
+				continue;
+			}
+			const releasesList = releasesListNode as List;
+
+			const releaseGroups = releasesList.children.map((child) =>
+				this.parseReleaseGroupFromListItem(child, releaseType),
+			);
+
+			console.log({ releaseGroups });
+		}
+	}
+
+	private parseReleaseGroupFromListItem(
+		item: ListItem,
+		releaseType: string,
+	): ReleaseGroup | null {
+		const link = item.children
+			.find((child) => child.type === "paragraph")
+			?.children.find((child) => child.type === "link");
+
+		if (!link) {
+			return null;
+		}
+		const mbid = extractMbidFromUrl(link.url);
+
+		const linkText = link.children.find((child) => child.type === "text");
+		if (!linkText) {
+			return null;
+		}
+		const title = linkText.value;
+
+		const dataList = item.children.find(
+			(child) => child.type === "list",
+		)?.children;
+		if (!dataList) {
+			return null;
+		}
+
+		const textNodes = dataList
+			.flatMap((listItem) => {
+				const itemParagraph = listItem.children.find(
+					(child) => child.type === "paragraph",
 				);
-				if (!textNode) {
+				if (!itemParagraph) {
 					return null;
 				}
 
-				return textNode.value;
-			})
-			.filter((name) => name !== null);
+				const itemText = itemParagraph.children.find(
+					(child) => child.type === "text",
+				);
+				if (!itemText) {
+					return null;
+				}
 
-		console.error({ releaseTypeNames });
+				return itemText.value;
+			})
+			.filter((node) => node !== null);
+
+		const releaseDateText = textNodes.find((child) =>
+			child.startsWith("Release Date: "),
+		);
+		if (!releaseDateText) {
+			return null;
+		}
+		const releaseDate = releaseDateText.substring(
+			releaseDateText.length - 10,
+		);
+
+		let secondaryTypes: string[] = [];
+		const secondaryTypeText = textNodes.find((child) =>
+			child.startsWith("Secondary Types: "),
+		);
+		if (secondaryTypeText) {
+			const typeList = secondaryTypeText.split(": ")[1];
+			if (typeList) {
+				secondaryTypes = typeList.split(",");
+			}
+		}
+
+		return {
+			id: mbid,
+			title: title,
+			"primary-type": releaseType,
+			"secondary-types": secondaryTypes,
+			"first-release-date": releaseDate,
+		};
 	}
 }

@@ -1,4 +1,4 @@
-import type { Heading, List, ListItem, Root, RootContent } from "mdast";
+import type { Heading, ListItem, Root, RootContent } from "mdast";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkParse from "remark-parse";
 import { unified } from "unified";
@@ -264,24 +264,10 @@ export default class ArtistDetailsFile {
 	}
 
 	private processReleasesFromFile(ast: Root): void {
-		const musicNodeIndex = getIndexOfHeader(ast, "Music");
-		if (musicNodeIndex < 0) {
-			return;
-		}
-
-		const nodesBelowMusicHeader = ast.children.slice(musicNodeIndex + 1);
-
-		const headingNodes = nodesBelowMusicHeader
-			.filter((node) => node.type === "heading" && node.depth === 3)
-			.map((node) => node as Heading);
-
-		const releaseTypes = headingNodes
-			.map((node) => node.children.find((child) => child.type === "text"))
-			.filter((child) => child !== undefined)
-			.map((child) => child.value);
+		const releaseTypes = this.getReleaseTypes(ast);
 
 		for (const releaseType of releaseTypes) {
-			console.log({ releaseType });
+			const typeName = releaseType.slice(0, releaseType.length - 1);
 
 			const indexOfHeader = getIndexOfHeader(ast, releaseType);
 			if (ast.children.length <= indexOfHeader) {
@@ -292,19 +278,40 @@ export default class ArtistDetailsFile {
 			if (!releasesListNode || releasesListNode.type !== "list") {
 				continue;
 			}
-			const releasesList = releasesListNode as List;
+			const releasesList = releasesListNode;
 
-			const releaseGroups = releasesList.children.map((child) =>
-				this.parseReleaseGroupFromListItem(child, releaseType),
-			);
+			const releaseGroups = releasesList.children
+				.map((child) =>
+					this.parseReleaseGroupFromListItem(child, typeName),
+				)
+				.filter((grp) => grp !== null);
 
-			console.log({ releaseGroups });
+			this._releases[typeName] = releaseGroups;
 		}
+	}
+
+	private getReleaseTypes(ast: Root): string[] {
+		const musicNodeIndex = getIndexOfHeader(ast, "Music");
+		if (musicNodeIndex < 0) {
+			return [];
+		}
+
+		const nodesBelowMusicHeader = ast.children.slice(musicNodeIndex + 1);
+		const headingNodes = nodesBelowMusicHeader
+			.filter((node) => node.type === "heading" && node.depth === 3)
+			.map((node) => node as Heading);
+
+		const releaseTypes = headingNodes
+			.map((node) => node.children.find((child) => child.type === "text"))
+			.filter((child) => child !== undefined)
+			.map((child) => child.value);
+
+		return releaseTypes;
 	}
 
 	private parseReleaseGroupFromListItem(
 		item: ListItem,
-		releaseType: string,
+		primaryType: string,
 	): ReleaseGroup | null {
 		const link = item.children
 			.find((child) => child.type === "paragraph")
@@ -372,7 +379,7 @@ export default class ArtistDetailsFile {
 		return {
 			id: mbid,
 			title: title,
-			"primary-type": releaseType,
+			"primary-type": primaryType,
 			"secondary-types": secondaryTypes,
 			"first-release-date": releaseDate,
 		};

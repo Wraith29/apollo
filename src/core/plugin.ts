@@ -54,8 +54,8 @@ export default class ApolloPlugin extends Plugin {
 		this.addCommand({
 			id: "recommend-album",
 			name: "Recommend album",
-			callback: async () => {
-				await recommendAlbum(this.settings, this._fileSystem);
+			callback: () => {
+				recommendAlbum(this.app);
 			},
 		});
 

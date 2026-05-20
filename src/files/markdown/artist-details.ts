@@ -120,6 +120,13 @@ export default class ArtistDetailsFile {
 		const releaseTypeNodes = [];
 
 		for (const [releaseType, values] of Object.entries(this._releases)) {
+			values.sort((left, right) => {
+				const leftDate = new Date(left["first-release-date"]);
+				const rightDate = new Date(right["first-release-date"]);
+
+				return leftDate.getTime() - rightDate.getTime();
+			});
+
 			const releasesList = buildList(
 				values.map((release) => {
 					const link = `https://musicbrainz.org/release-group/${release.id}`;

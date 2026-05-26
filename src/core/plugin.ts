@@ -55,7 +55,7 @@ export default class ApolloPlugin extends Plugin {
 			id: "recommend-album",
 			name: "Recommend album",
 			callback: () => {
-				recommendAlbum(this.app);
+				recommendAlbum(this.app, this.settings, this._fileSystem);
 			},
 		});
 

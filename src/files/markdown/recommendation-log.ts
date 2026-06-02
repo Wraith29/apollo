@@ -47,9 +47,7 @@ export default class RecommendationLogFile {
 		return inst;
 	}
 
-	public async addRecommendation(
-		recommendation: Recommendation,
-	): Promise<void> {
+	public addRecommendation(recommendation: Recommendation): void {
 		const dateKey = formatDate(new Date(), DATE_FORMAT);
 
 		const entries = this._recommendations[dateKey] ?? [];
@@ -86,18 +84,14 @@ export default class RecommendationLogFile {
 			return [];
 		}
 
-		const listItems = entries
-			.map((entry) =>
-				buildListItem([
-					buildParagraph([
-						buildText(entry.releaseName + " - "),
-						buildLink(entry.artistPath, [
-							buildText(entry.artistName),
-						]),
-					]),
+		const listItems = entries.map((entry) =>
+			buildListItem([
+				buildParagraph([
+					buildText(entry.releaseName + " - "),
+					buildLink(entry.artistPath, [buildText(entry.artistName)]),
 				]),
-			)
-			.filter((item) => item !== null);
+			]),
+		);
 
 		return [buildHeading(dateKey, 2), buildList(listItems)];
 	}

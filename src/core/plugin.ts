@@ -16,7 +16,7 @@ import {
 } from "obsidian-extended-metadatacache";
 
 export default class ApolloPlugin extends Plugin {
-	private _settings: ApolloSettings;
+	public settings: ApolloSettings;
 	private readonly _fileSystem: IFileSystem;
 	private readonly _httpClient: IHttpClient;
 	private readonly _musicbrainzClient: IMusicbrainzClient;
@@ -25,7 +25,7 @@ export default class ApolloPlugin extends Plugin {
 	constructor(app: App, manifest: PluginManifest) {
 		super(app, manifest);
 
-		this._settings = DEFAULT_SETTINGS;
+		this.settings = DEFAULT_SETTINGS;
 		this._fileSystem = new FileSystem(
 			this.app.vault,
 			this.app.fileManager,
@@ -46,7 +46,7 @@ export default class ApolloPlugin extends Plugin {
 			callback: async () => {
 				await addArtist(
 					this.app,
-					this._settings,
+					this.settings,
 					this._fileSystem,
 					this._musicbrainzClient,
 				);
@@ -58,7 +58,7 @@ export default class ApolloPlugin extends Plugin {
 			name: "Update artists",
 			callback: async () => {
 				await updateArtists(
-					this._settings,
+					this.settings,
 					this._fileSystem,
 					this._musicbrainzClient,
 				);
@@ -71,7 +71,7 @@ export default class ApolloPlugin extends Plugin {
 			callback: () => {
 				recommendAlbum(
 					this.app,
-					this._settings,
+					this.settings,
 					this._fileSystem,
 					this._extendedCache.api,
 				);
@@ -84,15 +84,15 @@ export default class ApolloPlugin extends Plugin {
 	}
 
 	public onunload(): void {
-		this._extendedCache?.release();
+		this._extendedCache.release();
 	}
 
 	private async loadSettings(): Promise<void> {
 		const loaded = (await this.loadData()) as Partial<ApolloSettings>;
-		this._settings = Object.assign({}, DEFAULT_SETTINGS, loaded);
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, loaded);
 	}
 
 	async saveSettings() {
-		await this.saveData(this._settings);
+		await this.saveData(this.settings);
 	}
 }

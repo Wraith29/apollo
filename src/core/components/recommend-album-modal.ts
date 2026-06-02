@@ -149,7 +149,7 @@ export class RecommendAlbumModal extends Modal {
 			}
 
 			const shuffledAlbums = albums.shuffle();
-			const selectedAlbum = shuffledAlbums.find((alb) => alb);
+			const selectedAlbum = shuffledAlbums.first();
 			if (!selectedAlbum) {
 				continue;
 			}
@@ -203,7 +203,7 @@ export class RecommendAlbumModal extends Modal {
 	}
 
 	private getArtistNameFromFilePath(filePath: string): string {
-		const nameWithExt = filePath.split("/").last()!;
+		const nameWithExt = filePath.split("/").last() ?? filePath;
 		return nameWithExt.substring(0, nameWithExt.indexOf("."));
 	}
 }

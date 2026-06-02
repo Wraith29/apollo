@@ -20,7 +20,7 @@ export default class ApolloPlugin extends Plugin {
 	private readonly _fileSystem: IFileSystem;
 	private readonly _httpClient: IHttpClient;
 	private readonly _musicbrainzClient: IMusicbrainzClient;
-	private _extendedCache: ExtendedMetadataCacheHandle | null = null;
+	private readonly _extendedCache: ExtendedMetadataCacheHandle;
 
 	constructor(app: App, manifest: PluginManifest) {
 		super(app, manifest);
@@ -34,11 +34,10 @@ export default class ApolloPlugin extends Plugin {
 
 		this._httpClient = new HttpClient();
 		this._musicbrainzClient = new MusicbrainzClient(this._httpClient);
+		this._extendedCache = getAPI(this.app);
 	}
 
 	public async onload(): Promise<void> {
-		this._extendedCache = getAPI(this.app);
-
 		await this.loadSettings();
 
 		this.addCommand({
@@ -70,7 +69,12 @@ export default class ApolloPlugin extends Plugin {
 			id: "recommend-album",
 			name: "Recommend album",
 			callback: () => {
-				recommendAlbum(this.app, this._settings, this._fileSystem);
+				recommendAlbum(
+					this.app,
+					this._settings,
+					this._fileSystem,
+					this._extendedCache.api,
+				);
 			},
 		});
 

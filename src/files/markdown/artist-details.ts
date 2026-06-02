@@ -101,6 +101,10 @@ export default class ArtistDetailsFile {
 		);
 	}
 
+	public getReleaseGroupsOfType(primaryType: string): ReleaseGroup[] {
+		return this._releases[primaryType] ?? [];
+	}
+
 	private buildAst(): Root {
 		return {
 			type: "root",

@@ -1,6 +1,6 @@
-import { Plugin } from "obsidian";
+import { App, Plugin, PluginManifest } from "obsidian";
 import { HttpClient, type IHttpClient } from "@/clients/http";
-import { MusicbrainzClient } from "@/clients/musicbrainz";
+import { IMusicbrainzClient, MusicbrainzClient } from "@/clients/musicbrainz";
 import { addArtist } from "@/core/commands/add-artist";
 import { FileSystem, type IFileSystem } from "@/files/filesystem";
 import {
@@ -10,20 +10,35 @@ import {
 } from "./settings";
 import { updateArtists } from "./commands/update-artists";
 import { recommendAlbum } from "./commands/recommend-album";
+import {
+	ExtendedMetadataCacheHandle,
+	getAPI,
+} from "obsidian-extended-metadatacache";
 
 export default class ApolloPlugin extends Plugin {
-	public settings: ApolloSettings = DEFAULT_SETTINGS;
-	private readonly _fileSystem: IFileSystem = new FileSystem(
-		this.app.vault,
-		this.app.fileManager,
-		this.app.workspace,
-	);
-	private readonly _httpClient: IHttpClient = new HttpClient();
-	private readonly _musicbrainzClient = new MusicbrainzClient(
-		this._httpClient,
-	);
+	private _settings: ApolloSettings;
+	private readonly _fileSystem: IFileSystem;
+	private readonly _httpClient: IHttpClient;
+	private readonly _musicbrainzClient: IMusicbrainzClient;
+	private _extendedCache: ExtendedMetadataCacheHandle | null = null;
+
+	constructor(app: App, manifest: PluginManifest) {
+		super(app, manifest);
+
+		this._settings = DEFAULT_SETTINGS;
+		this._fileSystem = new FileSystem(
+			this.app.vault,
+			this.app.fileManager,
+			this.app.workspace,
+		);
+
+		this._httpClient = new HttpClient();
+		this._musicbrainzClient = new MusicbrainzClient(this._httpClient);
+	}
 
 	public async onload(): Promise<void> {
+		this._extendedCache = getAPI(this.app);
+
 		await this.loadSettings();
 
 		this.addCommand({
@@ -32,7 +47,7 @@ export default class ApolloPlugin extends Plugin {
 			callback: async () => {
 				await addArtist(
 					this.app,
-					this.settings,
+					this._settings,
 					this._fileSystem,
 					this._musicbrainzClient,
 				);
@@ -44,7 +59,7 @@ export default class ApolloPlugin extends Plugin {
 			name: "Update artists",
 			callback: async () => {
 				await updateArtists(
-					this.settings,
+					this._settings,
 					this._fileSystem,
 					this._musicbrainzClient,
 				);
@@ -55,7 +70,7 @@ export default class ApolloPlugin extends Plugin {
 			id: "recommend-album",
 			name: "Recommend album",
 			callback: () => {
-				recommendAlbum(this.app, this.settings, this._fileSystem);
+				recommendAlbum(this.app, this._settings, this._fileSystem);
 			},
 		});
 
@@ -64,12 +79,16 @@ export default class ApolloPlugin extends Plugin {
 		);
 	}
 
+	public onunload(): void {
+		this._extendedCache?.release();
+	}
+
 	private async loadSettings(): Promise<void> {
 		const loaded = (await this.loadData()) as Partial<ApolloSettings>;
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, loaded);
+		this._settings = Object.assign({}, DEFAULT_SETTINGS, loaded);
 	}
 
 	async saveSettings() {
-		await this.saveData(this.settings);
+		await this.saveData(this._settings);
 	}
 }

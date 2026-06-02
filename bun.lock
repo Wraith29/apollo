@@ -10,6 +10,7 @@
         "mdast-util-frontmatter": "^2.0.1",
         "micromark-extension-frontmatter": "^2.0.0",
         "obsidian": "^1.12.3",
+        "obsidian-extended-metadatacache": "^0.5.1",
         "remark-frontmatter": "^5.0.0",
         "remark-parse": "^11.0.0",
         "remark-stringify": "^11.0.0",
@@ -547,6 +548,8 @@
     "object.values": ["object.values@1.2.1", "", { "dependencies": { "call-bind": "^1.0.8", "call-bound": "^1.0.3", "define-properties": "^1.2.1", "es-object-atoms": "^1.0.0" } }, "sha512-gXah6aZrcUxjWg2zR2MwouP2eHlCBzdV4pygudehaKXSGW4v2AsRQUK+lwwXhii6KFZcunEnmSUoYp5CXibxtA=="],
 
     "obsidian": ["obsidian@1.12.3", "", { "dependencies": { "@types/codemirror": "5.60.8", "moment": "2.29.4" }, "peerDependencies": { "@codemirror/state": "6.5.0", "@codemirror/view": "6.38.6" } }, "sha512-HxWqe763dOqzXjnNiHmAJTRERN8KILBSqxDSEqbeSr7W8R8Jxezzbca+nz1LiiqXnMpM8lV2jzAezw3CZ4xNUw=="],
+
+    "obsidian-extended-metadatacache": ["obsidian-extended-metadatacache@0.5.1", "", { "peerDependencies": { "obsidian": ">=1.5.7" } }, "sha512-KkkHo1L2NRtiPyNh5MWOiUxC+eKku+csTduXkRdqQ+jhNC6Rm6Qm3vdwOvmTNBfyoYUaGn3G0nPAtIgDvX8GSA=="],
 
     "optionator": ["optionator@0.9.4", "", { "dependencies": { "deep-is": "^0.1.3", "fast-levenshtein": "^2.0.6", "levn": "^0.4.1", "prelude-ls": "^1.2.1", "type-check": "^0.4.0", "word-wrap": "^1.2.5" } }, "sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g=="],
 

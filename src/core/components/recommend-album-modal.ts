@@ -13,6 +13,7 @@ import { joinAndNormalizePath } from "@/utils/path";
 import { ExtendedMetadataCacheAPI } from "obsidian-extended-metadatacache";
 import { ReleaseGroup } from "@/types/musicbrainz";
 import ArtistDetailsFile from "@/files/markdown/artist-details";
+import RecommendationLogFile from "@/files/markdown/recommendation-log";
 
 export class RecommendAlbumModal extends Modal {
 	private readonly _cfg: ApolloSettings;
@@ -21,7 +22,8 @@ export class RecommendAlbumModal extends Modal {
 	private readonly _tags: string[];
 	private _recommendationEl: HTMLDivElement | undefined;
 	private _selectedTag: string = "";
-	private _releaseArtist: string = "";
+	private _releaseArtistPath: string = "";
+	private _releaseArtistName: string = "";
 	private _releaseGroup: ReleaseGroup | null = null;
 	private _saveRecommendationButton: ButtonComponent | null = null;
 
@@ -112,11 +114,11 @@ export class RecommendAlbumModal extends Modal {
 
 		const imgEl = this._recommendationEl.createEl("img", "cover-art");
 		imgEl.src = `http://coverartarchive.org/release-group/${this._releaseGroup.id}/front`;
-		imgEl.alt = `Cover art for "${this._releaseGroup.title}" by ${this._releaseArtist}`;
+		imgEl.alt = `Cover art for "${this._releaseGroup.title}" by ${this._releaseArtistName}`;
 
 		const detailsEl = this._recommendationEl.createDiv("details");
 		const artistNameEl = detailsEl.createEl("p", "artist-name");
-		artistNameEl.innerText = this._releaseArtist;
+		artistNameEl.innerText = this._releaseArtistName;
 
 		const albumNameEl = detailsEl.createEl("p", "album-name");
 		albumNameEl.innerText = this._releaseGroup.title;
@@ -152,7 +154,8 @@ export class RecommendAlbumModal extends Modal {
 				continue;
 			}
 			releaseGroup = selectedAlbum;
-			this._releaseArtist = this.getArtistNameFromFilePath(artist);
+			this._releaseArtistPath = artist;
+			this._releaseArtistName = this.getArtistNameFromFilePath(artist);
 
 			index++;
 		} while (releaseGroup === null && index < shuffled.length);
@@ -180,7 +183,24 @@ export class RecommendAlbumModal extends Modal {
 		return [...filesWithTag];
 	}
 
-	private async saveRecommendationToLog(): Promise<void> {}
+	private async saveRecommendationToLog(): Promise<void> {
+		if (!this._releaseGroup || !this._releaseArtistName) {
+			return;
+		}
+
+		const file = await RecommendationLogFile.fromFile(
+			this._cfg,
+			this._fileSystem,
+		);
+
+		file.addRecommendation({
+			releaseName: this._releaseGroup.title,
+			artistName: this._releaseArtistName,
+			artistPath: this._releaseArtistPath,
+		});
+
+		await file.save();
+	}
 
 	private getArtistNameFromFilePath(filePath: string): string {
 		const nameWithExt = filePath.split("/").last()!;

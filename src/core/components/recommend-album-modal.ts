@@ -20,8 +20,11 @@ export class RecommendAlbumModal extends Modal {
 	private readonly _fileSystem: IFileSystem;
 	private readonly _cache: ExtendedMetadataCacheAPI;
 	private readonly _tags: string[];
+
 	private _recommendationEl: HTMLDivElement | undefined;
-	private _selectedTag: string = "";
+	private _tagFilter: string = "";
+	private _nameFilter: string = "";
+
 	private _releaseArtistPath: string = "";
 	private _releaseArtistName: string = "";
 	private _releaseGroup: ReleaseGroup | null = null;
@@ -53,6 +56,14 @@ export class RecommendAlbumModal extends Modal {
 		this.setTitle("Album recommendation");
 
 		new Setting(this.contentEl)
+			.setName("Filter by name:")
+			.addText((txt) => {
+				txt.onChange((val) => {
+					this._nameFilter = val;
+				});
+			});
+
+		new Setting(this.contentEl)
 			.setName("Filter by tag:")
 			.addDropdown((drop) => {
 				drop.addOption("", "No filter");
@@ -62,7 +73,7 @@ export class RecommendAlbumModal extends Modal {
 				});
 
 				drop.onChange((value) => {
-					this._selectedTag = value;
+					this._tagFilter = value;
 				});
 			});
 
@@ -99,7 +110,7 @@ export class RecommendAlbumModal extends Modal {
 			return;
 		}
 		if (!this._releaseGroup) {
-			console.error({ message: "Recommended releaseg roup not found." });
+			console.error({ message: "Recommended release group not found." });
 			return;
 		}
 
@@ -134,6 +145,7 @@ export class RecommendAlbumModal extends Modal {
 		let index = 0;
 		let releaseGroup: ReleaseGroup | null = null;
 		do {
+			console.log("Looping to find a recommended artist");
 			const artist = shuffled[index];
 			if (!artist) {
 				continue;
@@ -174,11 +186,19 @@ export class RecommendAlbumModal extends Modal {
 	private getValidFiles(): string[] {
 		const artistRoot = joinAndNormalizePath(this._cfg.dataRoot, "Artists");
 
-		if (this._selectedTag === "") {
+		if (this._tagFilter === "" && this._nameFilter === "") {
 			return this._fileSystem.getFilesInFolder(artistRoot);
+		} else if (this._tagFilter === "") {
+			const allFiles = this._fileSystem.getFilesInFolder(artistRoot);
+
+			const filtered = allFiles
+				.map((path) => path.slice(path.lastIndexOf("/") + 1))
+				.filter((path) => path.startsWith(this._nameFilter));
+
+			return filtered;
 		}
 
-		const filesWithTag = this._cache.getFilesWithTag(this._selectedTag);
+		const filesWithTag = this._cache.getFilesWithTag(this._tagFilter);
 
 		return [...filesWithTag];
 	}

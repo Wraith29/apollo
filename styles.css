@@ -1,5 +1,13 @@
 div.recommendation-view {
 	display: flex;
+
+	&.mobile-recommendation {
+		flex-direction: column;
+	}
+
+	&.desktop-recommendation {
+		flex-direction: row;
+	}
 }
 
 button.save-rec-btn {
@@ -10,8 +18,15 @@ button.save-rec-btn {
 img.cover-art {
 	border: var(--border-width) solid var(--background-secondary);
 	border-radius: 5px;
-	width: 30%;
 	margin: 5px;
+
+	&.desktop-image {
+		width: 30%;
+	}
+
+	&.mobile-image {
+		width: 100%;
+	}
 }
 
 p.artist-name {

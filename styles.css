@@ -1,8 +1,20 @@
-/*
+div.recommendation-view {
+	display: flex;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+button.save-rec-btn {
+	color: var(--text-on-accent);
+	background-color: var(--interactive-accent);
+}
 
-If your plugin does not need CSS, delete this file.
+img.cover-art {
+	border: var(--border-width) solid var(--background-secondary);
+	border-radius: 5px;
+	width: 30%;
+	margin: 5px;
+}
 
-*/
+p.artist-name {
+	margin-top: 3px;
+	text-decoration: underline;
+}

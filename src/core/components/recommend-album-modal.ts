@@ -88,7 +88,7 @@ export class RecommendAlbumModal extends Modal {
 				this._saveRecommendationButton = btn;
 
 				this._saveRecommendationButton
-					.setButtonText("Save to recommendation log")
+					.setButtonText("Save to log")
 					.setClass("save-rec-btn")
 					.setDisabled(true)
 					.onClick(async () => {
@@ -104,7 +104,7 @@ export class RecommendAlbumModal extends Modal {
 			);
 	}
 
-	private updateRecommendationView(): void {
+	private renderRecommendation(): void {
 		if (!this._recommendationEl) {
 			console.error({ message: "Recommendation element not found." });
 			return;
@@ -116,16 +116,20 @@ export class RecommendAlbumModal extends Modal {
 
 		this._saveRecommendationButton?.setDisabled(false);
 
-		if (Platform.isMobile) {
-			this._recommendationEl.innerText = "Haha mobile loser.\nFuck you";
-			return;
-		}
-
 		this._recommendationEl.empty();
+
 
 		const imgEl = this._recommendationEl.createEl("img", "cover-art");
 		imgEl.src = `http://coverartarchive.org/release-group/${this._releaseGroup.id}/front`;
 		imgEl.alt = `Cover art for "${this._releaseGroup.title}" by ${this._releaseArtistName}`;
+
+		if (Platform.isMobile) {
+			this._recommendationEl.addClass("mobile-recommendation");
+			imgEl.addClass("mobile-image");
+		} else {
+			this._recommendationEl.addClass("desktop-recommendation");
+			imgEl.addClass("desktop-image");
+		}
 
 		const detailsEl = this._recommendationEl.createDiv("details");
 		const artistNameEl = detailsEl.createEl("p", "artist-name");
@@ -145,7 +149,6 @@ export class RecommendAlbumModal extends Modal {
 		let index = 0;
 		let releaseGroup: ReleaseGroup | null = null;
 		do {
-			console.log("Looping to find a recommended artist");
 			const artist = shuffled[index];
 			if (!artist) {
 				continue;
@@ -180,7 +183,7 @@ export class RecommendAlbumModal extends Modal {
 
 		this._releaseGroup = releaseGroup;
 
-		this.updateRecommendationView();
+		this.renderRecommendation();
 	}
 
 	private getValidFiles(): string[] {

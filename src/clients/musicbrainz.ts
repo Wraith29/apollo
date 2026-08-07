@@ -39,20 +39,19 @@ export class MusicbrainzClient implements IMusicbrainzClient {
 			method: "GET",
 			url: url,
 			headers: {
-				"User-Agent":
-					"ObsidianMusicManager/1.0.0 (i.acnaylor@gmail.com)",
+				"User-Agent": "ObsidianMusicManager/1.0.0 (i.acnaylor@gmail.com)",
 				Accept: "application/json",
 			},
 		};
 
 		const result = await this._client.httpGet<ArtistDetails>(request);
-		this._lastCall = new Date().getTime();
+		this._lastCall = Date.now();
 
 		return result;
 	}
 
 	private async ensureMinDelayIsMet(): Promise<void> {
-		const now = new Date().getTime();
+		const now = Date.now();
 		const minTime = this._lastCall + this._minDelayMs;
 
 		if (minTime > now) {

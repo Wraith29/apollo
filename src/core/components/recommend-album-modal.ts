@@ -1,17 +1,17 @@
-import { IFileSystem } from "@/files/filesystem";
+import type { IFileSystem } from "@/files/filesystem";
 import {
-	App,
-	ButtonComponent,
+	type App,
+	type ButtonComponent,
 	Modal,
 	Notice,
 	Platform,
 	Setting,
 } from "obsidian";
-import { ApolloSettings } from "@/core/settings";
+import type { ApolloSettings } from "@/core/settings";
 import { getAllTagsInFolder } from "@/utils/tags";
 import { joinAndNormalizePath } from "@/utils/path";
-import { ExtendedMetadataCacheAPI } from "obsidian-extended-metadatacache";
-import { ReleaseGroup } from "@/types/musicbrainz";
+import type { ExtendedMetadataCacheAPI } from "obsidian-extended-metadatacache";
+import type { ReleaseGroup } from "@/types/musicbrainz";
 import ArtistDetailsFile from "@/files/markdown/artist-details";
 import RecommendationLogFile from "@/files/markdown/recommendation-log";
 

@@ -1,5 +1,5 @@
-import { IFileSystem } from "@/files/filesystem";
-import { getAllTags, MetadataCache } from "obsidian";
+import type { IFileSystem } from "@/files/filesystem";
+import { getAllTags, type MetadataCache } from "obsidian";
 
 export function getAllTagsInFolder(
 	cache: MetadataCache,

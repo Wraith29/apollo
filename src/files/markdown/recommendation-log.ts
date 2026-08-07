@@ -1,6 +1,6 @@
 import { joinAndNormalizePath } from "@/utils/path";
-import { IFileSystem } from "../filesystem";
-import { ApolloSettings } from "@/core/settings";
+import type { IFileSystem } from "../filesystem";
+import type { ApolloSettings } from "@/core/settings";
 import type { List, Root, RootContent } from "mdast";
 import { unified } from "unified";
 import remarkParse from "remark-parse";

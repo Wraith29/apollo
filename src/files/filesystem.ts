@@ -1,4 +1,4 @@
-import { Notice, Workspace, type FileManager, type Vault } from "obsidian";
+import { Notice, type Workspace, type FileManager, type Vault } from "obsidian";
 
 export class FileNotFoundError extends Error {
 	constructor(path: string) {

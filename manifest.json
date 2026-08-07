@@ -1,7 +1,7 @@
 {
 	"id": "wraith29-apollo",
 	"name": "Apollo",
-	"version": "1.0.4",
+	"version": "1.0.5",
 	"minAppVersion": "1.11.5",
 	"description": "Music library management tool",
 	"author": "Isaac Naylor",

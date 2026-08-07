@@ -1,8 +1,8 @@
-import { App } from "obsidian";
+import type { App } from "obsidian";
 import { RecommendAlbumModal } from "../components/recommend-album-modal";
-import { ApolloSettings } from "../settings";
-import { IFileSystem } from "@/files/filesystem";
-import { ExtendedMetadataCacheAPI } from "obsidian-extended-metadatacache";
+import type { ApolloSettings } from "../settings";
+import type { IFileSystem } from "@/files/filesystem";
+import type { ExtendedMetadataCacheAPI } from "obsidian-extended-metadatacache";
 
 export function recommendAlbum(
 	app: App,

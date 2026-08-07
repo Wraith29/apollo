@@ -1,6 +1,6 @@
-import { IFileSystem } from "@/files/filesystem";
-import { ApolloSettings } from "@/core/settings";
-import { IMusicbrainzClient } from "@/clients/musicbrainz";
+import type { IFileSystem } from "@/files/filesystem";
+import type { ApolloSettings } from "@/core/settings";
+import type { IMusicbrainzClient } from "@/clients/musicbrainz";
 import ArtistDetailsFile from "@/files/markdown/artist-details";
 import { joinAndNormalizePath } from "@/utils/path";
 

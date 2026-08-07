@@ -1,6 +1,6 @@
-import { App, Plugin, PluginManifest } from "obsidian";
+import { type App, Plugin, type PluginManifest } from "obsidian";
 import { HttpClient, type IHttpClient } from "@/clients/http";
-import { IMusicbrainzClient, MusicbrainzClient } from "@/clients/musicbrainz";
+import { type IMusicbrainzClient, MusicbrainzClient } from "@/clients/musicbrainz";
 import { addArtist } from "@/core/commands/add-artist";
 import { FileSystem, type IFileSystem } from "@/files/filesystem";
 import {
@@ -11,7 +11,7 @@ import {
 import { updateArtists } from "./commands/update-artists";
 import { recommendAlbum } from "./commands/recommend-album";
 import {
-	ExtendedMetadataCacheHandle,
+	type ExtendedMetadataCacheHandle,
 	getAPI,
 } from "obsidian-extended-metadatacache";
 

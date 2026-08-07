@@ -1,11 +1,11 @@
-import { joinAndNormalizePath } from "@/utils/path";
-import { IFileSystem } from "../filesystem";
-import { ApolloSettings } from "@/core/settings";
+import { formatDate } from "date-fns";
 import type { List, Root, RootContent } from "mdast";
-import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
-import { formatDate, parse } from "date-fns";
+import { unified } from "unified";
+import type { ApolloSettings } from "@/core/settings";
+import { joinAndNormalizePath } from "@/utils/path";
+import type { IFileSystem } from "../filesystem";
 import {
 	buildHeading,
 	buildLink,
@@ -35,10 +35,7 @@ export default class RecommendationLogFile {
 		cfg: ApolloSettings,
 		fileSystem: IFileSystem,
 	): Promise<RecommendationLogFile> {
-		const filePath = joinAndNormalizePath(
-			cfg.dataRoot,
-			"Recommendations.md",
-		);
+		const filePath = joinAndNormalizePath(cfg.dataRoot, "Recommendations.md");
 		await fileSystem.ensureFileExists(filePath);
 
 		const inst = new RecommendationLogFile(filePath, fileSystem);
@@ -68,8 +65,7 @@ export default class RecommendationLogFile {
 	private buildAst(): Root {
 		const keys = Object.keys(this._recommendations);
 		keys.sort(
-			(left, right) =>
-				new Date(left).getTime() - new Date(right).getTime(),
+			(left, right) => new Date(left).getTime() - new Date(right).getTime(),
 		);
 
 		return {
@@ -87,7 +83,7 @@ export default class RecommendationLogFile {
 		const listItems = entries.map((entry) =>
 			buildListItem([
 				buildParagraph([
-					buildText(entry.releaseName + " - "),
+					buildText(`${entry.releaseName} - `),
 					buildLink(entry.artistPath, [buildText(entry.artistName)]),
 				]),
 			]),
@@ -122,21 +118,14 @@ export default class RecommendationLogFile {
 			if (!headingDate) {
 				continue;
 			}
-			const date = parse(headingDate, DATE_FORMAT, new Date());
 
-			const dateRecommendations = this.processRecommendationList(
-				list,
-				date,
-			);
+			const dateRecommendations = this.processRecommendationList(list);
 
 			this._recommendations[headingDate] = dateRecommendations;
 		}
 	}
 
-	private processRecommendationList(
-		list: List,
-		date: Date,
-	): Recommendation[] {
+	private processRecommendationList(list: List): Recommendation[] {
 		const recommendations: Recommendation[] = [];
 
 		list.children.forEach((listItem) => {
@@ -155,9 +144,7 @@ export default class RecommendationLogFile {
 			}
 
 			const albumName = text.substring(0, text.length - 3);
-			const link = paragraph.children.find(
-				(child) => child.type === "link",
-			);
+			const link = paragraph.children.find((child) => child.type === "link");
 			if (!link) {
 				return;
 			}

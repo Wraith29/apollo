@@ -1,6 +1,9 @@
 import { type App, Plugin, type PluginManifest } from "obsidian";
 import { HttpClient, type IHttpClient } from "@/clients/http";
-import { type IMusicbrainzClient, MusicbrainzClient } from "@/clients/musicbrainz";
+import {
+	type IMusicbrainzClient,
+	MusicbrainzClient,
+} from "@/clients/musicbrainz";
 import { addArtist } from "@/core/commands/add-artist";
 import { FileSystem, type IFileSystem } from "@/files/filesystem";
 import {
@@ -14,6 +17,7 @@ import {
 	type ExtendedMetadataCacheHandle,
 	getAPI,
 } from "obsidian-extended-metadatacache";
+import { addGig } from "./commands/add-gig";
 
 export default class ApolloPlugin extends Plugin {
 	public settings: ApolloSettings;
@@ -75,6 +79,14 @@ export default class ApolloPlugin extends Plugin {
 					this._fileSystem,
 					this._extendedCache.api,
 				);
+			},
+		});
+
+		this.addCommand({
+			id: "add-gig",
+			name: "Add gig",
+			callback: async () => {
+				await addGig(this.app, this.settings, this._fileSystem);
 			},
 		});
 

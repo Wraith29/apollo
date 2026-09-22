@@ -1,4 +1,0 @@
-# [test]
-# coverage = true
-# coverageReporter = ["lcov"]
-# coverageSkipTestFiles = true

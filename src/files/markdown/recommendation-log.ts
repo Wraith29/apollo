@@ -14,8 +14,7 @@ import {
 	buildParagraph,
 	buildText,
 } from "./utils";
-
-const DATE_FORMAT = "yyyy-MM-dd";
+import { DATE_FORMAT_YMD } from "@/consts";
 
 type Recommendation = {
 	releaseName: string;
@@ -35,7 +34,10 @@ export default class RecommendationLogFile {
 		cfg: ApolloSettings,
 		fileSystem: IFileSystem,
 	): Promise<RecommendationLogFile> {
-		const filePath = joinAndNormalizePath(cfg.dataRoot, "Recommendations.md");
+		const filePath = joinAndNormalizePath(
+			cfg.dataRoot,
+			"Recommendations.md",
+		);
 		await fileSystem.ensureFileExists(filePath);
 
 		const inst = new RecommendationLogFile(filePath, fileSystem);
@@ -45,7 +47,7 @@ export default class RecommendationLogFile {
 	}
 
 	public addRecommendation(recommendation: Recommendation): void {
-		const dateKey = formatDate(new Date(), DATE_FORMAT);
+		const dateKey = formatDate(new Date(), DATE_FORMAT_YMD);
 
 		const entries = this._recommendations[dateKey] ?? [];
 		entries.push(recommendation);
@@ -65,7 +67,8 @@ export default class RecommendationLogFile {
 	private buildAst(): Root {
 		const keys = Object.keys(this._recommendations);
 		keys.sort(
-			(left, right) => new Date(left).getTime() - new Date(right).getTime(),
+			(left, right) =>
+				new Date(left).getTime() - new Date(right).getTime(),
 		);
 
 		return {
@@ -144,7 +147,9 @@ export default class RecommendationLogFile {
 			}
 
 			const albumName = text.substring(0, text.length - 3);
-			const link = paragraph.children.find((child) => child.type === "link");
+			const link = paragraph.children.find(
+				(child) => child.type === "link",
+			);
 			if (!link) {
 				return;
 			}

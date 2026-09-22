@@ -1,12 +1,11 @@
+import type { HandleSubmitFn } from "@/types/modal";
 import { type App, Modal, Setting } from "obsidian";
-
-export type OnSubmitFn = (_: string) => Promise<void>;
 
 export class AddArtistModal extends Modal {
 	private _input: string | undefined;
-	private _onSubmit: OnSubmitFn;
+	private _onSubmit: HandleSubmitFn<string>;
 
-	constructor(app: App, handleSubmit: OnSubmitFn) {
+	constructor(app: App, handleSubmit: HandleSubmitFn<string>) {
 		super(app);
 		this._onSubmit = handleSubmit;
 
@@ -24,7 +23,9 @@ export class AddArtistModal extends Modal {
 		new Setting(this.contentEl)
 			.setName("Musicbrainz ID")
 			.setDesc(description)
-			.addText((inp) => inp.onChange((val: string) => (this._input = val)));
+			.addText((inp) =>
+				inp.onChange((val: string) => (this._input = val)),
+			);
 
 		new Setting(this.contentEl).addButton((btn) =>
 			btn

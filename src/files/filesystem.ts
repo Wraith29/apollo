@@ -17,6 +17,8 @@ export interface IFileSystem {
 	getAllFolders(): string[];
 	getFilesInFolder(path: string): string[];
 
+	getFileLinkText(to: string, from: string): string | null;
+
 	parseProperties<T>(path: string): Promise<T | null>;
 	processProperties(path: string, data: unknown): Promise<void>;
 }
@@ -93,6 +95,17 @@ export class FileSystem implements IFileSystem {
 		}
 
 		return folder.children.map((file) => file.path);
+	}
+
+	public getFileLinkText(to: string, from: string): string | null {
+		const file = this._vault.getFileByPath(to);
+		if (!file) {
+			return null;
+		}
+
+		const link = this._fileManager.generateMarkdownLink(file, from);
+
+		return link;
 	}
 
 	public async parseProperties<T>(path: string): Promise<T | null> {

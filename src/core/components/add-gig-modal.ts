@@ -86,9 +86,9 @@ export class AddGigModal extends Modal {
 			.setName("Venue")
 			.setDesc("Where was the gig?")
 			.addDropdown((drop) => {
-				this._venueOptions.forEach((opt) =>
-					drop.addOption(opt.key, opt.value),
-				);
+				this._venueOptions.forEach((opt) => {
+					drop.addOption(opt.key, opt.value);
+				});
 
 				drop.setValue("");
 				drop.onChange((val) => (this._venue = val));
@@ -98,9 +98,9 @@ export class AddGigModal extends Modal {
 			.setName("Main act")
 			.setDesc("Who was the headliner?")
 			.addDropdown((drop) => {
-				this._artistOptions.forEach((opt) =>
-					drop.addOption(opt.key, opt.value),
-				);
+				this._artistOptions.forEach((opt) => {
+					drop.addOption(opt.key, opt.value);
+				});
 
 				drop.setValue("");
 				drop.onChange((val) => (this._mainAct = val));
@@ -119,10 +119,12 @@ export class AddGigModal extends Modal {
 						return;
 					}
 
+					// We've done our validity check above.
+					// Venue / MainAct should never be null here but the compiler doesn't know that
 					await this._onSubmit({
 						date: parse(this._date, DATE_FORMAT_DMY, new Date()),
-						venue: this._venue!,
-						mainAct: this._mainAct!,
+						venue: this._venue ?? "",
+						mainAct: this._mainAct ?? "",
 						supportActs: this._supportActs,
 					});
 
@@ -164,9 +166,9 @@ export class AddGigModal extends Modal {
 		for (let i = 0; i < this._supportActCount; i++) {
 			group.addSetting((setting) => {
 				setting.setName(`Support act ${i + 1}`).addDropdown((drop) => {
-					this._artistOptions.forEach((opt) =>
-						drop.addOption(opt.key, opt.value),
-					);
+					this._artistOptions.forEach((opt) => {
+						drop.addOption(opt.key, opt.value);
+					});
 
 					drop.setValue("");
 					drop.onChange((act) => {
@@ -193,6 +195,11 @@ export class AddGigModal extends Modal {
 
 		if (!this._date) {
 			console.warn({ message: "Date not valid" });
+			return false;
+		}
+
+		if (!this._venue) {
+			console.warn({ message: "Venue not ralid" });
 			return false;
 		}
 

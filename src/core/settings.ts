@@ -1,4 +1,4 @@
-import { type App, PluginSettingTab, SecretComponent, Setting } from "obsidian";
+import { type App, PluginSettingTab, Setting } from "obsidian";
 import type { IFileSystem } from "@/files/filesystem";
 import type ApolloPlugin from "./plugin";
 

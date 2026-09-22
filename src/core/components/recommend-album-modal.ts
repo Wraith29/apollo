@@ -118,7 +118,6 @@ export class RecommendAlbumModal extends Modal {
 
 		this._recommendationEl.empty();
 
-
 		const imgEl = this._recommendationEl.createEl("img", "cover-art");
 		imgEl.src = `http://coverartarchive.org/release-group/${this._releaseGroup.id}/front`;
 		imgEl.alt = `Cover art for "${this._releaseGroup.title}" by ${this._releaseArtistName}`;

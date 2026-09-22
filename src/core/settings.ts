@@ -4,12 +4,12 @@ import type ApolloPlugin from "./plugin";
 
 export type ApolloSettings = {
 	dataRoot: string;
-	setlistFmSecretKey: string;
+	defaultSupportActCount: number;
 };
 
 export const DEFAULT_SETTINGS: ApolloSettings = {
 	dataRoot: "Music",
-	setlistFmSecretKey: "setlist-fm-api-key",
+	defaultSupportActCount: 2,
 };
 
 export class ApolloSettingsTab extends PluginSettingTab {
@@ -44,15 +44,17 @@ export class ApolloSettingsTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Setlist API key")
-			.setDesc("Select a secret from your storage for setlist.fm")
-			.addComponent((el) =>
-				new SecretComponent(this.app, el)
-					.setValue(this._plugin.settings.setlistFmSecretKey)
-					.onChange(async (value) => {
-						this._plugin.settings.setlistFmSecretKey = value;
-						await this._plugin.saveSettings();
-					}),
-			);
+			.setName("Default number of supports.")
+			.setDesc(
+				"When creating a new gig, how many support acts are added by default",
+			)
+			.addSlider((slider) => {
+				slider.setLimits(0, 10, 1);
+				slider.setValue(2);
+				slider.onChange(async (value: number) => {
+					this._plugin.settings.defaultSupportActCount = value;
+					await this._plugin.saveSettings();
+				});
+			});
 	}
 }

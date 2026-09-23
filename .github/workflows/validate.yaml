@@ -1,0 +1,14 @@
+name: validate
+
+on:
+  workflow_call:
+  pull_request:
+
+jobs:
+  validate:
+    name: Validate Code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run lint workflow
+        uses: ./.github/workflows/lint.yaml

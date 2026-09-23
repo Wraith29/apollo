@@ -1,0 +1,72 @@
+name: Build
+
+on:
+  push:
+    branches: main
+
+jobs:
+  run-validation:
+    uses: $/.github/workflows/validate.yml
+
+  run-build:
+    name: Build the binary
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Install tools
+        uses: jdx/mise-action@v4
+        with:
+          install_args: "-E ci"
+
+      - name: Install dependencies
+        run: bun install --production --frozen-lockfile
+
+      - name: Build the application code
+        run: bun run build
+
+      - name: Get build version
+        id: version
+        run: |
+          FAILED=false
+          PACKAGE_VERSION=$(jq -r ".version" < package.json)
+          MANIFEST_VERSION=$(jq -r ".version" < manifest.json)
+          LATEST_TAG=$(git describe --tag --abbrev=0)
+
+          if [[ "$PACKAGE_VERSION" != "$MANIFEST_VERSION" ]]; then
+            echo "Looks like your manifest.json & package.json `version` fields aren't aligned."
+            echo "Make sure these are up to date and then try again :)"
+            FAILED=true
+          fi
+
+          if [[ "v$PACKAGE_VERSION" == "$LATEST_TAG" ]]; then
+            echo "Looks like the version in package.json is the same as the latest git tag."
+            echo "Have you updated the package.json version"
+            FAILED=true
+          fi
+
+          if [[ $FAILED == true ]]; then
+            echo "Something is wrong with your versioning."
+            exit 1
+          fi
+
+          echo "new_tag=v$PACKAGE_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Tag the commit
+        env:
+          NEW_TAG: ${{ steps.version.outputs.new_tag }}
+        run: |
+          git tag -a "$NEW_TAG" -m "release: $NEW_TAG"
+          git push origin "$NEW_TAG"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            main.js
+            manifest.json
+            styles.css

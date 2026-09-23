@@ -20,7 +20,7 @@ jobs:
         run: bun run lint-ci
 
       - name: Install build dependencies
-        run: bun install --production --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Run build
         run: bun run build

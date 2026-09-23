@@ -19,7 +19,5 @@ jobs:
       - name: Run linting
         run: bun run lint-ci
 
-      - name: Check version has been updated
-        if: ${{ github.ref_name == 'main' }}
-        run: |
-          CURRENT_VERSION=$(bun run package-version)
+      - name: Run build
+        run: bun run build

@@ -46,7 +46,7 @@ export default class ArtistDetailsFile {
 	private constructor(
 		private readonly _filePath: string,
 		private readonly _fileSystem: IFileSystem,
-	) {}
+	) { }
 
 	public static async fromDetails(
 		filePath: string,
@@ -119,8 +119,11 @@ export default class ArtistDetailsFile {
 
 	private buildMusicNodes(): RootContent[] {
 		const releaseTypeNodes = [];
+		const sorted = Object.entries(this._releases).sort((left, right) =>
+			left[0] > right[0] ? 1 : -1
+		);
 
-		for (const [releaseType, values] of Object.entries(this._releases)) {
+		for (const [releaseType, values] of sorted) {
 			values.sort((left, right) => {
 				const leftDate = new Date(left["first-release-date"]);
 				const rightDate = new Date(right["first-release-date"]);

@@ -6,6 +6,12 @@ export type ReleaseGroup = {
 	"secondary-types": string[];
 };
 
+export type ReleaseGroupBrowseRequest = {
+	"release-group-offset": number;
+	"release-group-count": number;
+	"release-groups": ReleaseGroup[];
+};
+
 export type Relation = {
 	type: string;
 	url: {

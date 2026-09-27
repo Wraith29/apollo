@@ -13,7 +13,7 @@ export class HttpClient implements IHttpClient {
 	public async httpGet<T>(request: RequestUrlParam): Promise<T> {
 		let response: RequestUrlResponse;
 		try {
-			response = await requestUrl(request);
+			response = await requestUrl({ method: "GET", ...request });
 		} catch (error) {
 			console.error({
 				message: "Failed to request url",

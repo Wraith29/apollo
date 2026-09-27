@@ -1,7 +1,7 @@
 import type { ArtistDetails, ReleaseGroup, ReleaseGroupBrowseRequest } from "@/types/musicbrainz";
 import { sleep } from "@/utils/sleep";
 import type { IHttpClient } from "./http";
-import { RequestUrlParam } from "obsidian";
+import type { RequestUrlParam } from "obsidian";
 
 const USER_AGENT = "ObsidianMusicManager/1.0.0 (i.acnaylor@gmail.com)";
 

@@ -27,17 +27,19 @@ export class AddArtistModal extends Modal {
 				inp.onChange((val: string) => (this._input = val)),
 			);
 
-		new Setting(this.contentEl).addButton((btn) =>
-			btn
-				.setButtonText("Submit")
-				.setCta()
-				.onClick(async () => {
-					if (this._input) {
-						await this._onSubmit(this._input);
+		new Setting(this.contentEl)
+			.addButton((btn) => {
+				btn
+					.setButtonText("Submit")
+					.setCta()
+					.onClick(async () => {
+						if (this._input) {
+							btn.setButtonText("Gathering info...");
+							await this._onSubmit(this._input);
 
-						this.close();
-					}
-				}),
-		);
+							this.close();
+						}
+					});
+			});
 	}
 }

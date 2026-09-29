@@ -72,12 +72,12 @@ export class MusicbrainzClient implements IMusicbrainzClient {
 			const request = this.buildRequest(url);
 
 			result = await this._client.httpGet<ReleaseGroupBrowseRequest>(request);
-			releaseGroups.push(...result["release-groups"]);
+			this._lastCall = Date.now();
 
+			releaseGroups.push(...result["release-groups"]);
 			offset = releaseGroups.length;
 			total =result["release-group-count"];
 		} while (releaseGroups.length < total);
-
 
 		return releaseGroups;
 	}

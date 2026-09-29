@@ -1,5 +1,4 @@
 import type { ArtistDetails, ReleaseGroup, ReleaseGroupBrowseRequest } from "@/types/musicbrainz";
-import { sleep } from "@/utils/sleep";
 import type { IHttpClient } from "./http";
 import type { RequestUrlParam } from "obsidian";
 
@@ -12,22 +11,18 @@ export interface IMusicbrainzClient {
 export class MusicbrainzClient implements IMusicbrainzClient {
 	private readonly _baseUrl: string = "https://musicbrainz.org/ws/2";
 	private readonly _minDelayMs: number = 1000;
+
 	// Maximum according to MusicBrainz
 	private readonly _pageSize: number = 100;
 	private readonly _client: IHttpClient;
 
-	private _lastCall: number = 0;
-
 	constructor(client: IHttpClient) {
 		this._client = client;
+		this._client.setMinimumDelay(this._minDelayMs);
 	}
 
 	public getMinDelay(): number {
 		return this._minDelayMs;
-	}
-
-	public getLastCall(): number {
-		return this._lastCall;
 	}
 
 	public getBaseUrl(): string {
@@ -45,15 +40,12 @@ export class MusicbrainzClient implements IMusicbrainzClient {
 	}
 
 	private async getArtistRelations(mbid: string): Promise<ArtistDetails> {
-		await this.ensureMinDelayIsMet();
-
 		const includes = ["url-rels"].join("+");
 		const url = `${this._baseUrl}/artist/${mbid}?inc=${includes}`;
 
 		const request = this.buildRequest(url);
 
 		const result = await this._client.httpGet<ArtistDetails>(request);
-		this._lastCall = Date.now();
 
 		return result;
 	}
@@ -66,13 +58,10 @@ export class MusicbrainzClient implements IMusicbrainzClient {
 		let result: ReleaseGroupBrowseRequest;
 
 		do {
-			await this.ensureMinDelayIsMet();
-
 			const url = `${this._baseUrl}/release-group?artist=${mbid}&offset=${offset}&limit=${this._pageSize}`
 			const request = this.buildRequest(url);
 
 			result = await this._client.httpGet<ReleaseGroupBrowseRequest>(request);
-			this._lastCall = Date.now();
 
 			releaseGroups.push(...result["release-groups"]);
 			offset = releaseGroups.length;
@@ -82,15 +71,6 @@ export class MusicbrainzClient implements IMusicbrainzClient {
 		return releaseGroups;
 	}
 
-	private async ensureMinDelayIsMet(): Promise<void> {
-		const now = Date.now();
-		const minTime = this._lastCall + this._minDelayMs;
-
-		if (minTime > now) {
-			const diff = minTime - now;
-			await sleep(diff);
-		}
-	}
 
 	private buildRequest(url: string): RequestUrlParam{
 		return {

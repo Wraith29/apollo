@@ -12,6 +12,8 @@ export interface IMusicbrainzClient {
 export class MusicbrainzClient implements IMusicbrainzClient {
 	private readonly _baseUrl: string = "https://musicbrainz.org/ws/2";
 	private readonly _minDelayMs: number = 1000;
+	// Maximum according to MusicBrainz
+	private readonly _pageSize: number = 100;
 	private readonly _client: IHttpClient;
 
 	private _lastCall: number = 0;
@@ -66,16 +68,16 @@ export class MusicbrainzClient implements IMusicbrainzClient {
 		do {
 			await this.ensureMinDelayIsMet();
 
-			const url = `${this._baseUrl}/release-group?artist=${mbid}&offset=${offset}`
+			const url = `${this._baseUrl}/release-group?artist=${mbid}&offset=${offset}&limit=${this._pageSize}`
 			const request = this.buildRequest(url);
 
 			result = await this._client.httpGet<ReleaseGroupBrowseRequest>(request);
-			releaseGroups.push(...result["release-groups"]);
+			this._lastCall = Date.now();
 
+			releaseGroups.push(...result["release-groups"]);
 			offset = releaseGroups.length;
 			total =result["release-group-count"];
 		} while (releaseGroups.length < total);
-
 
 		return releaseGroups;
 	}

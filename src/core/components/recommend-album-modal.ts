@@ -8,18 +8,16 @@ import {
 	Setting,
 } from "obsidian";
 import type { ApolloSettings } from "@/core/settings";
-import { getAllTagsInFolder } from "@/utils/tags";
 import { joinAndNormalizePath } from "@/utils/path";
-import type { ExtendedMetadataCacheAPI } from "obsidian-extended-metadatacache";
 import type { ReleaseGroup } from "@/types/musicbrainz";
 import ArtistDetailsFile from "@/files/markdown/artist-details";
 import RecommendationLogFile from "@/files/markdown/recommendation-log";
+import ArtistCache from "@/core/artist-cache";
 
 export class RecommendAlbumModal extends Modal {
 	private readonly _cfg: ApolloSettings;
 	private readonly _fileSystem: IFileSystem;
-	private readonly _cache: ExtendedMetadataCacheAPI;
-	private readonly _tags: string[];
+	private readonly _cache: ArtistCache;
 
 	private _recommendationEl: HTMLDivElement | undefined;
 	private _tagFilter: string = "";
@@ -34,20 +32,12 @@ export class RecommendAlbumModal extends Modal {
 		app: App,
 		cfg: ApolloSettings,
 		fs: IFileSystem,
-		cache: ExtendedMetadataCacheAPI,
+		cache: ArtistCache,
 	) {
 		super(app);
 		this._cfg = cfg;
 		this._fileSystem = fs;
 		this._cache = cache;
-
-		const allTags = getAllTagsInFolder(
-			app.metadataCache,
-			fs,
-			joinAndNormalizePath(cfg.dataRoot, "Artists"),
-		);
-
-		this._tags = [...new Set(allTags.map((tag) => tag.slice(1)))];
 
 		this.configureLayout();
 	}
@@ -68,7 +58,7 @@ export class RecommendAlbumModal extends Modal {
 			.addDropdown((drop) => {
 				drop.addOption("", "No filter");
 
-				this._tags.forEach((tag) => {
+				this._cache.allTags.forEach((tag) => {
 					drop.addOption(tag, tag);
 				});
 
@@ -200,7 +190,7 @@ export class RecommendAlbumModal extends Modal {
 			return filtered;
 		}
 
-		const filesWithTag = this._cache.getFilesWithTag(this._tagFilter);
+		const filesWithTag = this._cache.getArtistsWithTag(this._tagFilter);
 
 		return [...filesWithTag];
 	}

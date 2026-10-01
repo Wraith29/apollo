@@ -48,6 +48,14 @@ export default class ArtistDetailsFile {
 		private readonly _fileSystem: IFileSystem,
 	) { }
 
+	public get tags(): string[] {
+		return this._properties.tags;
+	}
+
+	public get albums(): ReleaseGroup[] {
+		return (this._releases["Album"] ?? []);
+	}
+
 	public static async fromDetails(
 		filePath: string,
 		fileSystem: IFileSystem,

@@ -46,14 +46,14 @@ export default class ArtistDetailsFile {
 	private constructor(
 		private readonly _filePath: string,
 		private readonly _fileSystem: IFileSystem,
-	) { }
+	) {}
 
 	public get tags(): string[] {
 		return this._properties.tags;
 	}
 
 	public get albums(): ReleaseGroup[] {
-		return (this._releases["Album"] ?? []);
+		return this._releases.Album ?? [];
 	}
 
 	public static async fromDetails(
@@ -103,7 +103,10 @@ export default class ArtistDetailsFile {
 		await this._fileSystem.writeFile(this._filePath, content);
 
 		// This needs to be done at the end, so that the other bits of content (Notes, music details) are already present;
-		await this._fileSystem.processProperties(this._filePath, this._properties);
+		await this._fileSystem.processProperties(
+			this._filePath,
+			this._properties,
+		);
 	}
 
 	public getReleaseGroupsOfType(primaryType: string): ReleaseGroup[] {
@@ -128,7 +131,7 @@ export default class ArtistDetailsFile {
 	private buildMusicNodes(): RootContent[] {
 		const releaseTypeNodes = [];
 		const sorted = Object.entries(this._releases).sort((left, right) =>
-			left[0] > right[0] ? 1 : -1
+			left[0] > right[0] ? 1 : -1,
 		);
 
 		for (const [releaseType, values] of sorted) {
@@ -142,17 +145,23 @@ export default class ArtistDetailsFile {
 			const releasesList = buildList(
 				values.map((release) => {
 					const link = `https://musicbrainz.org/release-group/${release.id}`;
-					const firstRelease = new Date(release["first-release-date"]);
+					const firstRelease = new Date(
+						release["first-release-date"],
+					);
 
 					const detailsNodes = [
 						buildListItem([
 							buildParagraph([
-								buildText(`Release Date: ${firstRelease.toLocaleDateString()}`),
+								buildText(
+									`Release Date: ${firstRelease.toLocaleDateString()}`,
+								),
 							]),
 						]),
 						buildListItem([
 							buildParagraph([
-								buildText(`Primary Type: ${release["primary-type"]}`),
+								buildText(
+									`Primary Type: ${release["primary-type"]}`,
+								),
 							]),
 						]),
 					];
@@ -161,28 +170,36 @@ export default class ArtistDetailsFile {
 						const joined = release["secondary-types"].join(", ");
 						detailsNodes.push(
 							buildListItem([
-								buildParagraph([buildText(`Secondary Types: ${joined}`)]),
+								buildParagraph([
+									buildText(`Secondary Types: ${joined}`),
+								]),
 							]),
 						);
 					}
 
 					return buildListItem([
-						buildParagraph([buildLink(link, [buildText(release.title)])]),
+						buildParagraph([
+							buildLink(link, [buildText(release.title)]),
+						]),
 						buildList(detailsNodes),
 					]);
 				}),
 			);
 
-			releaseTypeNodes.push(buildHeading(`${releaseType}s`, 3), releasesList);
+			releaseTypeNodes.push(
+				buildHeading(`${releaseType}s`, 3),
+				releasesList,
+			);
 		}
 
 		return [buildHeading("Music", 2), ...releaseTypeNodes];
 	}
 
 	private async processPropertiesFromFile(): Promise<void> {
-		const properties = await this._fileSystem.parseProperties<FileProperties>(
-			this._filePath,
-		);
+		const properties =
+			await this._fileSystem.parseProperties<FileProperties>(
+				this._filePath,
+			);
 
 		if (properties) {
 			this._properties = properties;
@@ -196,7 +213,9 @@ export default class ArtistDetailsFile {
 		artistDetails: ArtistDetails,
 	): Promise<void> {
 		const existingProperties =
-			await this._fileSystem.parseProperties<FileProperties>(this._filePath);
+			await this._fileSystem.parseProperties<FileProperties>(
+				this._filePath,
+			);
 
 		let addedOn = new Date();
 		if (existingProperties?.["added-on"]) {
@@ -211,14 +230,16 @@ export default class ArtistDetailsFile {
 		const spotifyUrl =
 			artistDetails.relations
 				.filter((rel) => rel.type === "free streaming")
-				.find((rel) => rel.url.resource.startsWith("https://open.spotify.com"))
-				?.url.resource ?? null;
+				.find((rel) =>
+					rel.url.resource.startsWith("https://open.spotify.com"),
+				)?.url.resource ?? null;
 
 		const instagramUrl =
 			artistDetails.relations
 				.filter((rel) => rel.type === "social network")
-				.find((rel) => rel.url.resource.startsWith("https://www.instagram.com"))
-				?.url.resource ?? null;
+				.find((rel) =>
+					rel.url.resource.startsWith("https://www.instagram.com"),
+				)?.url.resource ?? null;
 
 		this._properties = {
 			"added-on": addedOn,
@@ -282,7 +303,9 @@ export default class ArtistDetailsFile {
 			const releasesList = releasesListNode;
 
 			const releaseGroups = releasesList.children
-				.map((child) => this.parseReleaseGroupFromListItem(child, typeName))
+				.map((child) =>
+					this.parseReleaseGroupFromListItem(child, typeName),
+				)
 				.filter((grp) => grp !== null);
 
 			this._releases[typeName] = releaseGroups;
@@ -360,7 +383,9 @@ export default class ArtistDetailsFile {
 		if (!releaseDateText) {
 			return null;
 		}
-		const releaseDate = releaseDateText.substring(releaseDateText.length - 10);
+		const releaseDate = releaseDateText.substring(
+			releaseDateText.length - 10,
+		);
 
 		let secondaryTypes: string[] = [];
 		const secondaryTypeText = textNodes.find((child) =>

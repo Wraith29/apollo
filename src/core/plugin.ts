@@ -12,13 +12,11 @@ import {
 	DEFAULT_SETTINGS,
 } from "./settings";
 import { updateArtists } from "./commands/update-artists";
-import { recommendAlbum } from "./commands/recommend-album";
 import {
 	type ExtendedMetadataCacheHandle,
 	getAPI,
 } from "obsidian-extended-metadatacache";
 import { addGig } from "./commands/add-gig";
-import ArtistCache from "./artist-cache";
 
 export default class ApolloPlugin extends Plugin {
 	public settings: ApolloSettings;
@@ -26,7 +24,6 @@ export default class ApolloPlugin extends Plugin {
 	private readonly _httpClient: IHttpClient;
 	private readonly _musicbrainzClient: IMusicbrainzClient;
 	private readonly _extendedCache: ExtendedMetadataCacheHandle;
-	private readonly _artistCache: ArtistCache;
 
 	constructor(app: App, manifest: PluginManifest) {
 		super(app, manifest);
@@ -41,12 +38,10 @@ export default class ApolloPlugin extends Plugin {
 		this._httpClient = new HttpClient();
 		this._musicbrainzClient = new MusicbrainzClient(this._httpClient);
 		this._extendedCache = getAPI(this.app);
-		this._artistCache = new ArtistCache(this.app.vault, this.settings, this._fileSystem);
 	}
 
 	public async onload(): Promise<void> {
 		await this.loadSettings();
-		this._artistCache.register(this);
 
 		this.addCommand({
 			id: "add-artist",
@@ -69,19 +64,6 @@ export default class ApolloPlugin extends Plugin {
 					this.settings,
 					this._fileSystem,
 					this._musicbrainzClient,
-				);
-			},
-		});
-
-		this.addCommand({
-			id: "recommend-album",
-			name: "Recommend album",
-			callback: () => {
-				recommendAlbum(
-					this.app,
-					this.settings,
-					this._fileSystem,
-					this._artistCache,
 				);
 			},
 		});

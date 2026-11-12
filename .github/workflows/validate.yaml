@@ -17,10 +17,10 @@ jobs:
         uses: jdx/mise-action@v4
 
       - name: Run linting
-        run: bun run lint-ci
+        run: pnpm run lint-ci
 
       - name: Install build dependencies
-        run: bun install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Run build
-        run: bun run build
+        run: pnpm run build

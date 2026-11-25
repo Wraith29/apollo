@@ -43,7 +43,7 @@ importers:
         version: 11.0.5
     devDependencies:
       '@biomejs/biome':
-        specifier: ^2.5.7
+        specifier: ^2.5.14
         version: 2.6.6
       '@eslint/js':
         specifier: ^10.0.1

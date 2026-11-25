@@ -27,7 +27,7 @@
 		"typescript-eslint": "^8.70.1"
 	},
 	"dependencies": {
-		"date-fns": "^4.2.1",
+		"date-fns": "^4.4.0",
 		"mdast": "^3.0.0",
 		"mdast-util-from-markdown": "^2.0.3",
 		"mdast-util-frontmatter": "^2.0.1",
